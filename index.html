@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>予約フォーム</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 400px; margin: auto; }
+    label { display: block; margin-top: 10px; }
+    input, button { padding: 8px; margin-top: 5px; width: 100%; }
+    button { background: #06c755; color: white; border: none; border-radius: 6px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h2>予約フォーム</h2>
+  <form id="reserveForm">
+    <label>名前: <input type="text" id="name" required></label>
+    <label>日付: <input type="date" id="date" required></label>
+    <label>時刻: <input type="time" id="time" required></label>
+    <button type="submit">予約する</button>
+  </form>
+
+  <script>
+    // LIFF初期化
+    window.onload = function () {
+      liff.init({ liffId: "2008012264-GAaEPJdZ" }) // ← 発行されたLIFF IDに置き換える
+        .then(() => console.log("LIFF initialized"))
+        .catch(err => console.error(err));
+    }
+
+    // 予約フォーム送信
+    document.getElementById("reserveForm").addEventListener("submit", function(e){
+      e.preventDefault();
+
+      const data = {
+        name: document.getElementById("name").value,
+        date: document.getElementById("date").value,
+        time: document.getElementById("time").value
+      };
+
+      fetch("https://script.google.com/a/macros/ict.shimanet.ed.jp/s/AKfycbwPMqvmXnhCzJFGW4TW_dhGwB1EUNGKjpyOkJfwLL", { // ← GASのURLに置き換える
+        method: "POST",
+        body: JSON.stringify(data)
+      })
+      .then(res => res.json())
+      .then(res => {
+        if(res.status === "success"){
+          alert("予約を受け付けました！");
+          liff.closeWindow();
+        } else {
+          alert("エラーが発生しました");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
