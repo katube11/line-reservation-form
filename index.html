@@ -1,184 +1,123 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>予約フォーム（LIFF）雛形</title>
+  <meta charset="UTF-8">
+  <title>予約フォーム</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
-    /* シンプルなスタイル：スマホ向けに最適化 */
-    :root{font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif}
-    body{margin:0;padding:16px;background:#f7fafc;color:#0f172a}
-    .container{max-width:720px;margin:0 auto}
-    h1{font-size:1.25rem;margin-bottom:8px}
-    label{display:block;margin-top:12px;font-weight:600}
-    input[type="date"], input[type="text"]{width:100%;padding:10px;border-radius:8px;border:1px solid #e2e8f0;background:#fff}
-    #slots{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-    .slot{padding:8px 12px;border-radius:8px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;min-width:84px;text-align:center}
-    .slot.disabled{opacity:0.45;cursor:not-allowed}
-    .slot.selected{background:#06b6d4;color:#fff;border-color:transparent}
-    button.primary{display:block;width:100%;padding:12px;border-radius:10px;border:0;background:#0ea5a3;color:#fff;font-weight:700;margin-top:14px}
-    .msg{margin-top:12px}
-    .small{font-size:0.85rem;color:#475569}
+    body { font-family: sans-serif; padding: 20px; max-width: 400px; margin: auto; }
+    label { display: block; margin-top: 10px; }
+    input, button { padding: 8px; margin-top: 5px; width: 100%; }
+    button.primary { background: #06c755; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    .slot { display: inline-block; margin: 4px; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; }
+    .slot.booked { background: #ddd; cursor: not-allowed; }
+    .slot.selected { background: #06c755; color: #fff; }
+    .msg { margin-top: 10px; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>予約フォーム</h1>
+  <h2>予約フォーム</h2>
+  <form id="reserveForm">
+    <label>名前: <input type="text" id="name" required></label>
+    <label>日付: <input type="date" id="date" required></label>
 
-    <label for="name">名前</label>
-    <input id="name" type="text" placeholder="山田太郎" />
-
-    <label for="date">日付</label>
-    <input id="date" type="date" />
-
-　　<label>時刻</label>
-
+    <!-- 時刻はプルダウンを削除し、ここにボタンが出る -->
     <div id="slots"></div>
 
     <button id="reserveBtn" class="primary" disabled>予約する</button>
-
     <div class="msg" id="message"></div>
-  </div>
+  </form>
 
-  <!-- LIFF SDK -->
-  <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
   <script>
-    /*
-      使い方 (雛形):
-      1) 下の LIFF_ID と GAS_BASE_URL を実際の値に置き換えてください。
-      2) LIFF のスコープに "profile" を含めると名前やuserIdを取得できます。
-      3) GAS は doGet(date) で当日の予約配列を返し、doPost で予約登録する想定です。
-    */
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwPMqvmXnhCzJFGW4TW_dhGwB1EUNGKjpyOkJfwLL/exec"; // ← 自分のGAS URLに置き換える
+    let selectedTime = "";
 
-    const LIFF_ID = "2008012264-GAaEPJdZ"; // ← ここを置き換える
-    const GAS_BASE_URL = "https://script.google.com/a/macros/ict.shimanet.ed.jp/s/AKfycbzu8WI-QQoja6mi1tKqEw3CtT6xPowzyE6U-Hw0TbpUtrUK8hvtvA_UaYv7e4u949jGyw/exec"; // 例: https://script.google.com/macros/s/XXXX/exec
-
-    // 営業時間（必要に応じて変更）
-    const OPEN_TIME = "09:00";
-    const CLOSE_TIME = "18:00";
-
-    // state
-    let selectedTime = null;
-    let selectedDate = null;
-
-    // utils
-    function toMinutes(hhmm){ const [h,m]=hhmm.split(":").map(Number); return h*60+m; }
-    function fromMinutes(min){ const h=Math.floor(min/60); const m=min%60; return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`; }
-    function generateSlots(start=OPEN_TIME, end=CLOSE_TIME){ const out=[]; for(let t=toMinutes(start); t<toMinutes(end); t+=30) out.push(fromMinutes(t)); return out; }
-
-    // DOM
-    const nameInput = document.getElementById('name');
-    const dateInput = document.getElementById('date');
-    const slotsEl = document.getElementById('slots');
-    const reserveBtn = document.getElementById('reserveBtn');
-    const messageEl = document.getElementById('message');
-
-    // 初期化: 日付を今日にする
-    function initDate(){ const d=new Date(); const yyyy=d.getFullYear(); const mm=String(d.getMonth()+1).padStart(2,'0'); const dd=String(d.getDate()).padStart(2,'0'); dateInput.value=`${yyyy}-${mm}-${dd}`; }
-
-    // LIFF init
-    async function initLiff(){
-      try{
-        await liff.init({ liffId: LIFF_ID });
-        // プロフィールを取って名前をセット（許可がある場合のみ）
-        try{
-          const profile = await liff.getProfile();
-          if(profile && profile.displayName) nameInput.value = profile.displayName;
-        }catch(e){}
-      }catch(e){ console.warn('LIFF init failed', e); }
+    // LIFF初期化
+    window.onload = function () {
+      liff.init({ liffId: "2008012264-GAaEPJdZ" }) // ← 自分のLIFF IDに置き換える
+        .then(() => console.log("LIFF initialized"))
+        .catch(err => console.error(err));
     }
 
-    // 既存予約を取得して枠を描画
-    async function renderSlots(){
-      const date = dateInput.value;
-      selectedDate = date;
-      selectedTime = null;
-      reserveBtn.disabled = true;
-      messageEl.textContent = '';
+    // 日付が選ばれたらスロットを取得
+    document.getElementById("date").addEventListener("change", function(){
+      const date = this.value;
+      if (!date) return;
 
-      // 空の時に生成
-      const allSlots = generateSlots();
+      fetch(GAS_URL + "?date=" + date)
+        .then(res => res.json())
+        .then(data => renderSlots(date, data))
+        .catch(err => console.error(err));
+    });
 
-      // fetch existing bookings
-      let bookedTimes = new Set();
-      try{
-        const res = await fetch(`${GAS_BASE_URL}?date=${encodeURIComponent(date)}`);
-        if(res.ok){
-          const data = await res.json();
-          // data は配列 { date, time, name, ... }
-          data.forEach(r => { if(r.time) bookedTimes.add(r.time); else if(r['予約時刻']) bookedTimes.add(r['予約時刻']); });
-        }else{
-          console.warn('GET failed', res.status);
-        }
-      }catch(e){ console.warn('fetch error', e); }
+    // 時刻ボタンを生成
+    function renderSlots(date, reservations) {
+      const container = document.getElementById("slots");
+      container.innerHTML = "";
+      selectedTime = "";
+      document.getElementById("reserveBtn").disabled = true;
 
-      // 表示
-      slotsEl.innerHTML = '';
-      allSlots.forEach(t => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'slot';
+      const times = generateTimes("09:00", "18:00", 30); // 30分刻み
+      times.forEach(t => {
+        const btn = document.createElement("div");
         btn.textContent = t;
-        if(bookedTimes.has(t)){
-          btn.classList.add('disabled');
-          btn.disabled = true;
+        btn.className = "slot";
+
+        // 予約済みならブロック
+        if (reservations.some(r => r.date === date && r.time === t)) {
+          btn.classList.add("booked");
         } else {
-          btn.addEventListener('click', ()=>{
-            document.querySelectorAll('.slot').forEach(el=>el.classList.remove('selected'));
-            btn.classList.add('selected');
+          btn.addEventListener("click", () => {
+            document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
+            btn.classList.add("selected");
             selectedTime = t;
-            reserveBtn.disabled = false;
+            document.getElementById("reserveBtn").disabled = false;
           });
         }
-        slotsEl.appendChild(btn);
+
+        container.appendChild(btn);
       });
     }
 
-    // 予約実行
-    async function doReserve(){
-      if(!selectedDate || !selectedTime){ alert('日付と時間を選んでください'); return; }
-      const name = nameInput.value.trim();
-      if(!name){ alert('名前を入力してください'); return; }
+    // 時刻リスト生成
+    function generateTimes(start, end, interval) {
+      const times = [];
+      let [h, m] = start.split(":").map(Number);
+      const [eh, em] = end.split(":").map(Number);
 
-      reserveBtn.disabled = true;
-      messageEl.textContent = '送信中…';
-
-      // LIFFでuserIdが取れるなら送る
-      let lineId = '';
-      try{ const profile = await liff.getProfile(); lineId = profile.userId || ''; }catch(e){}
-
-      try{
-        const res = await fetch(GAS_BASE_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: name, date: selectedDate, time: selectedTime, lineId: lineId })
-        });
-        const j = await res.json();
-        if(j.success){
-          messageEl.textContent = '✅ ' + j.message;
-          // 再読み込みして最新状態に
-          await renderSlots();
-        } else {
-          messageEl.textContent = '⚠️ ' + (j.message || '予約に失敗しました');
-        }
-      }catch(e){
-        messageEl.textContent = 'エラーが発生しました';
-        console.error(e);
-      } finally {
-        reserveBtn.disabled = false;
+      while (h < eh || (h === eh && m <= em)) {
+        times.push(String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0"));
+        m += interval;
+        if (m >= 60) { h++; m = 0; }
       }
+      return times;
     }
 
-    // イベント
-    dateInput.addEventListener('change', renderSlots);
-    reserveBtn.addEventListener('click', doReserve);
+    // 予約送信
+    document.getElementById("reserveForm").addEventListener("submit", function(e){
+      e.preventDefault();
 
-    // 起動
-    (async ()=>{
-      initDate();
-      await initLiff();
-      await renderSlots();
-    })();
+      const data = {
+        name: document.getElementById("name").value,
+        date: document.getElementById("date").value,
+        time: selectedTime
+      };
+
+      fetch(GAS_URL, {
+        method: "POST",
+        body: JSON.stringify(data)
+      })
+      .then(res => res.json())
+      .then(res => {
+        document.getElementById("message").textContent = res.message;
+        if(res.success){
+          alert("予約が完了しました！");
+          liff.closeWindow();
+        } else {
+          alert(res.message);
+        }
+      });
+    });
   </script>
 </body>
 </html>
