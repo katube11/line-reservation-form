@@ -19,7 +19,7 @@
   <h2>予約フォーム</h2>
   <form id="reserveForm">
     <label>名前: <input type="text" id="name" required></label>
-    <label>日付: <input type="date" id="date" required></label>
+    <label>日付: <input type="date" id="date" required min=""></label>
 
     <!-- 時刻はプルダウンを削除し、ここにボタンが出る -->
     <div id="slots"></div>
@@ -29,17 +29,29 @@
   </form>
 
   <script>
-    const GAS_URL = "https://script.google.com/a/macros/ict.shimanet.ed.jp/s/AKfycbzu8WI-QQoja6mi1tKqEw3CtT6xPowzyE6U-Hw0TbpUtrUK8hvtvA_UaYv7e4u949jGyw/exec"; // ← 自分のGAS URLに置き換える
+    const GAS_URL = "https://script.google.com/macros/s/xxxxxxxxxxxx/exec"; // ← 自分のGASのURLに置き換える
     let selectedTime = "";
 
-    // LIFF初期化
+    // ===== 日付入力を今日以降に制限 =====
+    window.addEventListener("DOMContentLoaded", () => {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      const today = `${yyyy}-${mm}-${dd}`;
+      const dateInput = document.getElementById("date");
+      dateInput.min = today;   // 過去は選べない
+      dateInput.value = today; // 初期値は今日
+    });
+
+    // ===== LIFF初期化 =====
     window.onload = function () {
       liff.init({ liffId: "2008012264-GAaEPJdZ" }) // ← 自分のLIFF IDに置き換える
         .then(() => console.log("LIFF initialized"))
         .catch(err => console.error(err));
     }
 
-    // 日付が選ばれたらスロットを取得
+    // ===== 日付が選ばれたらスロットを取得 =====
     document.getElementById("date").addEventListener("change", function(){
       const date = this.value;
       if (!date) return;
@@ -50,7 +62,7 @@
         .catch(err => console.error(err));
     });
 
-    // 時刻ボタンを生成
+    // ===== 時刻ボタンを生成 =====
     function renderSlots(date, reservations) {
       const container = document.getElementById("slots");
       container.innerHTML = "";
@@ -79,7 +91,7 @@
       });
     }
 
-    // 時刻リスト生成
+    // ===== 時刻リスト生成 =====
     function generateTimes(start, end, interval) {
       const times = [];
       let [h, m] = start.split(":").map(Number);
@@ -93,7 +105,7 @@
       return times;
     }
 
-    // 予約送信
+    // ===== 予約送信 =====
     document.getElementById("reserveForm").addEventListener("submit", function(e){
       e.preventDefault();
 
