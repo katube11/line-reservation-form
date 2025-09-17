@@ -10,7 +10,6 @@
     input, button { padding: 8px; margin-top: 5px; width: 100%; }
     button.primary { background: #06c755; color: white; border: none; border-radius: 6px; cursor: pointer; }
     .slot, .dateBtn { display: inline-block; margin: 4px; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; }
-    .slot.booked, .dateBtn.booked { background: #ddd; cursor: not-allowed; }
     .slot.selected, .dateBtn.selected { background: #06c755; color: #fff; }
     .msg { margin-top: 10px; }
   </style>
@@ -25,7 +24,7 @@
     <div id="dates"></div>
 
     <!-- 時刻ボタン -->
-    <h3>時間を選択</h3>
+    <h3>空いている時間</h3>
     <div id="slots"></div>
 
     <button id="reserveBtn" class="primary" disabled>予約する</button>
@@ -85,7 +84,7 @@
         .catch(err => console.error(err));
     }
 
-    // ===== 時刻ボタンを表示 =====
+    // ===== 空いている時刻ボタンを表示 =====
     function renderSlots(date, reservations) {
       const container = document.getElementById("slots");
       container.innerHTML = "";
@@ -93,21 +92,29 @@
       document.getElementById("reserveBtn").disabled = true;
 
       const times = generateTimes("09:00", "18:00", 30);
-      times.forEach(t => {
+
+      // 予約済みの時刻を配列に
+      const bookedTimes = reservations.map(r => r.time);
+
+      // 空いている時間だけ表示
+      const available = times.filter(t => !bookedTimes.includes(t));
+
+      if (available.length === 0) {
+        container.textContent = "空いている時間はありません";
+        return;
+      }
+
+      available.forEach(t => {
         const btn = document.createElement("div");
         btn.textContent = t;
         btn.className = "slot";
 
-        if (reservations.some(r => r.date === date && r.time === t)) {
-          btn.classList.add("booked");
-        } else {
-          btn.addEventListener("click", () => {
-            document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
-            btn.classList.add("selected");
-            selectedTime = t;
-            document.getElementById("reserveBtn").disabled = false;
-          });
-        }
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
+          btn.classList.add("selected");
+          selectedTime = t;
+          document.getElementById("reserveBtn").disabled = false;
+        });
 
         container.appendChild(btn);
       });
