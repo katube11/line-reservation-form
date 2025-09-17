@@ -6,11 +6,13 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+    h2 { margin-bottom: 10px; }
     label { display: block; margin-top: 10px; }
     input, button { padding: 8px; margin-top: 5px; width: 100%; }
     button.primary { background: #06c755; color: white; border: none; border-radius: 6px; cursor: pointer; }
-    .slot, .dateBtn { display: inline-block; margin: 4px; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; }
-    .slot.selected, .dateBtn.selected { background: #06c755; color: #fff; }
+    .slot, .date-btn { display: inline-block; margin: 4px; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; }
+    .slot.booked { background: #ddd; cursor: not-allowed; }
+    .slot.selected, .date-btn.selected { background: #06c755; color: #fff; }
     .msg { margin-top: 10px; }
   </style>
 </head>
@@ -19,12 +21,10 @@
   <form id="reserveForm">
     <label>名前: <input type="text" id="name" required></label>
 
-    <!-- 日付をボタンで表示 -->
     <h3>日付を選択</h3>
     <div id="dates"></div>
 
-    <!-- 時刻ボタン -->
-    <h3>空いている時間</h3>
+    <h3>時間を選択</h3>
     <div id="slots"></div>
 
     <button id="reserveBtn" class="primary" disabled>予約する</button>
@@ -32,95 +32,79 @@
   </form>
 
   <script>
-    const GAS_URL = "https://script.google.com/a/macros/ict.shimanet.ed.jp/s/AKfycbxXkIT4fnsERLZtVxfsN7wIGWRc51yKNUc_moTZ_eJvTZ05wrzmtrCHUrPb322DECQXzQ/exec"; // ← 自分のGAS URL
+    const GAS_URL = "https://script.google.com/a/macros/ict.shimanet.ed.jp/s/AKfycbxXkIT4fnsERLZtVxfsN7wIGWRc51yKNUc_moTZ_eJvTZ05wrzmtrCHUrPb322DECQXzQ/exec"; 
     let selectedDate = "";
     let selectedTime = "";
 
-    // ===== LIFF初期化 =====
+    // LIFF初期化
     window.onload = function () {
-      liff.init({ liffId: "2008012264-GAaEPJdZ" }) // ← 自分のLIFF IDに置き換え
-        .then(() => {
-          console.log("LIFF initialized");
-          renderDates(); // 初期表示で日付ボタン生成
-        })
+      liff.init({ liffId: "2008012264-GAaEPJdZ" })
+        .then(() => console.log("LIFF initialized"))
         .catch(err => console.error(err));
+
+      renderDates(); // ページ表示時に日付ボタンを作る
     }
 
-    // ===== 今日から2週間分の日付ボタンを生成 =====
+    // 今日から2週間分の日付ボタンを作成
     function renderDates() {
       const container = document.getElementById("dates");
       container.innerHTML = "";
       const today = new Date();
-
-      for (let i = 0; i < 14; i++) {
+      for (let i=0; i<14; i++) {
         const d = new Date(today);
         d.setDate(today.getDate() + i);
-
         const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, "0");
-        const dd = String(d.getDate()).padStart(2, "0");
+        const mm = String(d.getMonth()+1).padStart(2,"0");
+        const dd = String(d.getDate()).padStart(2,"0");
         const dateStr = `${yyyy}-${mm}-${dd}`;
 
-        const btn = document.createElement("div");
-        btn.textContent = `${mm}/${dd} (${["日","月","火","水","木","金","土"][d.getDay()]})`;
-        btn.className = "dateBtn";
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "date-btn";
+        btn.textContent = dateStr;
 
-        btn.addEventListener("click", () => {
-          document.querySelectorAll(".dateBtn").forEach(b => b.classList.remove("selected"));
+        btn.onclick = () => {
+          document.querySelectorAll(".date-btn").forEach(el => el.classList.remove("selected"));
           btn.classList.add("selected");
           selectedDate = dateStr;
-          loadSlots(dateStr);
-        });
+          selectedTime = "";
+          document.getElementById("reserveBtn").disabled = true;
+
+          fetch(GAS_URL + "?date=" + dateStr)
+            .then(res => res.json())
+            .then(data => renderSlots(dateStr, data));
+        };
 
         container.appendChild(btn);
       }
     }
 
-    // ===== 選んだ日のスロット取得 =====
-    function loadSlots(date) {
-      fetch(GAS_URL + "?date=" + date)
-        .then(res => res.json())
-        .then(data => renderSlots(date, data))
-        .catch(err => console.error(err));
-    }
-
-    // ===== 空いている時刻ボタンを表示 =====
+    // 指定日の時間ボタンを作成
     function renderSlots(date, reservations) {
       const container = document.getElementById("slots");
       container.innerHTML = "";
-      selectedTime = "";
-      document.getElementById("reserveBtn").disabled = true;
-
       const times = generateTimes("09:00", "18:00", 30);
 
-      // 予約済みの時刻を配列に
-      const bookedTimes = reservations.map(r => r.time);
-
-      // 空いている時間だけ表示
-      const available = times.filter(t => !bookedTimes.includes(t));
-
-      if (available.length === 0) {
-        container.textContent = "空いている時間はありません";
-        return;
-      }
-
-      available.forEach(t => {
+      times.forEach(t => {
         const btn = document.createElement("div");
         btn.textContent = t;
         btn.className = "slot";
 
-        btn.addEventListener("click", () => {
-          document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
-          btn.classList.add("selected");
-          selectedTime = t;
-          document.getElementById("reserveBtn").disabled = false;
-        });
-
+        if (reservations.some(r => r.date === date && r.time === t)) {
+          btn.classList.add("booked");
+        } else {
+          btn.onclick = () => {
+            document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
+            btn.classList.add("selected");
+            selectedTime = t;
+            document.getElementById("reserveBtn").disabled = false;
+          };
+        }
         container.appendChild(btn);
       });
     }
 
-    // ===== 時刻リスト生成 =====
+    // 時間リスト生成（30分ごと）
     function generateTimes(start, end, interval) {
       const times = [];
       let [h, m] = start.split(":").map(Number);
@@ -134,10 +118,9 @@
       return times;
     }
 
-    // ===== 予約送信 =====
+    // 予約送信
     document.getElementById("reserveForm").addEventListener("submit", function(e){
       e.preventDefault();
-
       const data = {
         name: document.getElementById("name").value,
         date: selectedDate,
