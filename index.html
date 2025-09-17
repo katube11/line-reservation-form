@@ -5,13 +5,13 @@
   <title>予約フォーム</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 400px; margin: auto; }
+    body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
     label { display: block; margin-top: 10px; }
     input, button { padding: 8px; margin-top: 5px; width: 100%; }
     button.primary { background: #06c755; color: white; border: none; border-radius: 6px; cursor: pointer; }
-    .slot { display: inline-block; margin: 4px; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; }
-    .slot.booked { background: #ddd; cursor: not-allowed; }
-    .slot.selected { background: #06c755; color: #fff; }
+    .slot, .dateBtn { display: inline-block; margin: 4px; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; }
+    .slot.booked, .dateBtn.booked { background: #ddd; cursor: not-allowed; }
+    .slot.selected, .dateBtn.selected { background: #06c755; color: #fff; }
     .msg { margin-top: 10px; }
   </style>
 </head>
@@ -19,9 +19,13 @@
   <h2>予約フォーム</h2>
   <form id="reserveForm">
     <label>名前: <input type="text" id="name" required></label>
-    <label>日付: <input type="date" id="date" required min=""></label>
 
-    <!-- 時刻はプルダウンを削除し、ここにボタンが出る -->
+    <!-- 日付をボタンで表示 -->
+    <h3>日付を選択</h3>
+    <div id="dates"></div>
+
+    <!-- 時刻ボタン -->
+    <h3>時間を選択</h3>
     <div id="slots"></div>
 
     <button id="reserveBtn" class="primary" disabled>予約する</button>
@@ -29,53 +33,71 @@
   </form>
 
   <script>
-    const GAS_URL = "https://script.google.com/macros/s/xxxxxxxxxxxx/exec"; // ← 自分のGASのURLに置き換える
+    const GAS_URL = "https://script.google.com/macros/s/xxxxxxxxxxxx/exec"; // ← 自分のGAS URL
+    let selectedDate = "";
     let selectedTime = "";
-
-    // ===== 日付入力を今日以降に制限 =====
-    window.addEventListener("DOMContentLoaded", () => {
-      const d = new Date();
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, "0");
-      const dd = String(d.getDate()).padStart(2, "0");
-      const today = `${yyyy}-${mm}-${dd}`;
-      const dateInput = document.getElementById("date");
-      dateInput.min = today;   // 過去は選べない
-      dateInput.value = today; // 初期値は今日
-    });
 
     // ===== LIFF初期化 =====
     window.onload = function () {
-      liff.init({ liffId: "2008012264-GAaEPJdZ" }) // ← 自分のLIFF IDに置き換える
-        .then(() => console.log("LIFF initialized"))
+      liff.init({ liffId: "2008012264-GAaEPJdZ" }) // ← 自分のLIFF IDに置き換え
+        .then(() => {
+          console.log("LIFF initialized");
+          renderDates(); // 初期表示で日付ボタン生成
+        })
         .catch(err => console.error(err));
     }
 
-    // ===== 日付が選ばれたらスロットを取得 =====
-    document.getElementById("date").addEventListener("change", function(){
-      const date = this.value;
-      if (!date) return;
+    // ===== 今日から2週間分の日付ボタンを生成 =====
+    function renderDates() {
+      const container = document.getElementById("dates");
+      container.innerHTML = "";
+      const today = new Date();
 
+      for (let i = 0; i < 14; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
+
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const dd = String(d.getDate()).padStart(2, "0");
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+
+        const btn = document.createElement("div");
+        btn.textContent = `${mm}/${dd} (${["日","月","火","水","木","金","土"][d.getDay()]})`;
+        btn.className = "dateBtn";
+
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".dateBtn").forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          selectedDate = dateStr;
+          loadSlots(dateStr);
+        });
+
+        container.appendChild(btn);
+      }
+    }
+
+    // ===== 選んだ日のスロット取得 =====
+    function loadSlots(date) {
       fetch(GAS_URL + "?date=" + date)
         .then(res => res.json())
         .then(data => renderSlots(date, data))
         .catch(err => console.error(err));
-    });
+    }
 
-    // ===== 時刻ボタンを生成 =====
+    // ===== 時刻ボタンを表示 =====
     function renderSlots(date, reservations) {
       const container = document.getElementById("slots");
       container.innerHTML = "";
       selectedTime = "";
       document.getElementById("reserveBtn").disabled = true;
 
-      const times = generateTimes("09:00", "18:00", 30); // 30分刻み
+      const times = generateTimes("09:00", "18:00", 30);
       times.forEach(t => {
         const btn = document.createElement("div");
         btn.textContent = t;
         btn.className = "slot";
 
-        // 予約済みならブロック
         if (reservations.some(r => r.date === date && r.time === t)) {
           btn.classList.add("booked");
         } else {
@@ -111,7 +133,7 @@
 
       const data = {
         name: document.getElementById("name").value,
-        date: document.getElementById("date").value,
+        date: selectedDate,
         time: selectedTime
       };
 
