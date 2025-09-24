@@ -4,31 +4,38 @@
   <meta charset="UTF-8">
   <title>予約フォーム</title>
   <style>
-    .date-btn, .slot {
-      display: inline-block;
-      margin: 4px;
-      padding: 8px 12px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .slot.booked {
-      background: #ddd;
-      color: red;
-      cursor: not-allowed;
-    }
-    .selected { background: #06c755; color: white; }
+    body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+    h2, h3 { margin-bottom: 10px; }
+    label { display: block; margin-top: 10px; }
+    input, button { padding: 8px; margin-top: 5px; width: 100%; }
+    button.primary { background: #06c755; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    .slot, .date-btn { display: inline-block; margin: 4px; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; }
+    .slot.booked { background: #ddd; color: red; cursor: not-allowed; }
+    .slot.selected, .date-btn.selected { background: #06c755; color: #fff; }
+    .msg { margin-top: 10px; }
   </style>
 </head>
 <body>
   <h2>予約フォーム</h2>
-  <div id="dates"></div>
-  <div id="slots"></div>
+  <form id="reserveForm">
+    <label>名前: <input type="text" id="name" required></label>
+
+    <h3>日付を選択</h3>
+    <div id="dates"></div>
+
+    <h3>時間を選択</h3>
+    <div id="slots"></div>
+
+    <button id="reserveBtn" class="primary" disabled>予約する</button>
+    <div class="msg" id="message"></div>
+  </form>
 
   <script>
-    const GAS_URL = "あなたのGASの公開URLをここに"; // ★差し替え
+    // ★必ずあなたのGASデプロイURLに置き換えてください
+    const GAS_URL = "https://script.google.com/macros/s/XXXXXX/exec"; 
 
     let selectedDate = "";
+    let selectedTime = "";
 
     // ページ読み込み時に日付ボタンを表示
     window.onload = () => {
@@ -47,6 +54,7 @@
         const dateStr = d.toISOString().split("T")[0];
 
         const btn = document.createElement("button");
+        btn.type = "button";
         btn.textContent = dateStr;
         btn.className = "date-btn";
 
@@ -54,6 +62,8 @@
           document.querySelectorAll(".date-btn").forEach(el => el.classList.remove("selected"));
           btn.classList.add("selected");
           selectedDate = dateStr;
+          selectedTime = "";
+          document.getElementById("reserveBtn").disabled = true;
 
           // まず全時間帯を表示
           renderSlots([]);
@@ -78,18 +88,21 @@
       const times = generateTimes("09:00", "18:00", 30);
 
       times.forEach(t => {
-        const btn = document.createElement("div");
+        const btn = document.createElement("button");
+        btn.type = "button";
         btn.textContent = t;
         btn.className = "slot";
 
         if (reservations.some(r => r.time === t)) {
           btn.classList.add("booked");
           btn.textContent = t + "（先着がいます）";
+          btn.disabled = true;
         } else {
           btn.onclick = () => {
             document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
             btn.classList.add("selected");
-            console.log("選択した時間:", t);
+            selectedTime = t;
+            document.getElementById("reserveBtn").disabled = false;
           };
         }
 
@@ -110,6 +123,30 @@
       }
       return times;
     }
+
+    // 予約送信
+    document.getElementById("reserveForm").addEventListener("submit", function(e){
+      e.preventDefault();
+      const data = {
+        name: document.getElementById("name").value,
+        date: selectedDate,
+        time: selectedTime
+      };
+
+      fetch(GAS_URL, {
+        method: "POST",
+        body: JSON.stringify(data)
+      })
+      .then(res => res.json())
+      .then(res => {
+        document.getElementById("message").textContent = res.message;
+        if(res.success){
+          alert("予約が完了しました！");
+        } else {
+          alert(res.message);
+        }
+      });
+    });
   </script>
 </body>
 </html>
