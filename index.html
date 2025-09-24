@@ -1,145 +1,233 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>予約フォーム</title>
+  <meta charset="UTF-8" />
+  <title>予約フォーム（デバッグ版）</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
-    h2, h3 { margin-bottom: 10px; }
-    label { display: block; margin-top: 10px; }
-    input, button { padding: 8px; margin-top: 5px; width: 100%; }
-    button.primary { background: #06c755; color: white; border: none; border-radius: 6px; cursor: pointer; }
-    .slot, .date-btn { display: inline-block; margin: 4px; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; }
-    .slot.booked { background: #ddd; cursor: not-allowed; }
-    .slot.selected, .date-btn.selected { background: #06c755; color: #fff; }
-    .msg { margin-top: 10px; }
+    body{font-family: sans-serif; padding: 16px; max-width:720px; margin:auto}
+    .controls{margin-bottom:12px}
+    .date-btn, .slot { display:inline-block; margin:4px; padding:8px 12px; border:1px solid #ccc; border-radius:6px; cursor:pointer; }
+    .date-btn.selected, .slot.selected { background:#06c755; color:#fff; }
+    .slot.booked { background:#eee; color:#999; cursor:not-allowed; }
+    .primary{display:block;width:100%;padding:10px;border-radius:8px;border:0;background:#06c755;color:#fff}
+    #debug { white-space:pre-wrap; background:#111; color:#bde; padding:10px; border-radius:6px; margin-top:12px; max-height:200px; overflow:auto }
+    label{display:block; margin-top:8px}
   </style>
 </head>
 <body>
-  <h2>予約フォーム</h2>
+  <h2>予約フォーム（デバッグ版）</h2>
+
   <form id="reserveForm">
-    <label>名前: <input type="text" id="name" required></label>
+    <label>名前: <input id="name" type="text" required placeholder="山田太郎" /></label>
 
     <h3>日付を選択</h3>
-    <div id="dates"></div>
+    <div id="dates" class="controls"></div>
 
     <h3>時間を選択</h3>
-    <div id="slots"></div>
+    <div id="slots" class="controls"></div>
 
     <button id="reserveBtn" class="primary" disabled>予約する</button>
-    <div class="msg" id="message"></div>
+    <div id="message" style="margin-top:8px;color:green"></div>
   </form>
 
-  <script>
-    const GAS_URL = "https://script.google.com/a/macros/ict.shimanet.ed.jp/s/AKfycbwiRpiNGj8QJU1YBxSIop7nD0833bnSg5vOa_mDHWj6MmtEJsuLNdcbPWJo8H3ZVXWLwg/exec"; 
-    let selectedDate = "";
-    let selectedTime = "";
+  <h4>DEBUG</h4>
+  <div id="debug">（ここにデバッグログが出ます）</div>
 
-    // LIFF初期化
-    window.onload = function () {
-      liff.init({ liffId: "2008012264-GAaEPJdZ" })
-        .then(() => console.log("LIFF initialized"))
-        .catch(err => console.error(err));
+<script>
+(function(){
+  // --- 設定 ---
+  const GAS_URL = "★ここをあなたのGASのexec URLに置き換えてください★";
+  const USE_FETCH = true; // テストでfetch無効にするなら false にする
+  // ----------------
 
-      renderDates(); // ページ表示時に日付ボタンを作る
-    }
+  const debugEl = document.getElementById('debug');
+  function dbg(msg){
+    console.log(msg);
+    debugEl.textContent += msg + "\n";
+    // Auto-scroll
+    debugEl.scrollTop = debugEl.scrollHeight;
+  }
 
-    // 今日から2週間分の日付ボタンを作成
-    function renderDates() {
-      const container = document.getElementById("dates");
-      container.innerHTML = "";
-      const today = new Date();
-      for (let i=0; i<14; i++) {
-        const d = new Date(today);
-        d.setDate(today.getDate() + i);
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth()+1).padStart(2,"0");
-        const dd = String(d.getDate()).padStart(2,"0");
-        const dateStr = `${yyyy}-${mm}-${dd}`;
+  let selectedDate = "";
+  let selectedTime = "";
 
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "date-btn";
-        btn.textContent = dateStr;
-
-        btn.onclick = () => {
-          document.querySelectorAll(".date-btn").forEach(el => el.classList.remove("selected"));
-          btn.classList.add("selected");
-          selectedDate = dateStr;
-          selectedTime = "";
-          document.getElementById("reserveBtn").disabled = true;
-
-          // 予約状況取得
-          fetch(GAS_URL + "?date=" + dateStr)
-            .then(res => res.json())
-            .then(data => renderSlots(dateStr, data))
-            .catch(err => console.error(err));
-        };
-
-        container.appendChild(btn);
+  // 安全に LIFF を初期化（初期化失敗で処理が止まらないように）
+  window.addEventListener('load', async () => {
+    dbg("window.load - script started");
+    try{
+      if (window.liff) {
+        liff.init({ liffId: "2008012264-GAaEPJdZ" })
+          .then(()=> dbg("LIFF init ok"))
+          .catch(e=> dbg("LIFF init failed: " + e));
+      } else {
+        dbg("LIFF SDK not found (window.liff undefined)");
       }
+    }catch(e){
+      dbg("LIFF init error: " + e);
     }
 
-    // 時間ボタン生成
-    function renderSlots(date, reservations) {
-      const container = document.getElementById("slots");
-      container.innerHTML = "";
-      const times = generateTimes("09:00", "18:00", 30);
+    // すぐに日付ボタンを描画（LIFFに依存せず動くようにする）
+    renderDates();
+  });
 
-      times.forEach(t => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.textContent = t;
-        btn.className = "slot";
+  // 日付ボタン生成（今日から14日分）
+  function renderDates(){
+    dbg("renderDates() start");
+    const container = document.getElementById('dates');
+    container.innerHTML = "";
+    const today = new Date();
+    for(let i=0;i<14;i++){
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      const dateStr = d.toISOString().slice(0,10);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'date-btn';
+      btn.textContent = dateStr;
+      btn.addEventListener('click', () => onDateClick(dateStr, btn));
+      container.appendChild(btn);
+      dbg("created date button: " + dateStr);
+    }
+  }
 
-        // 予約済み時間は押せない＋「先着がいます」
-        if (reservations.some(r => r.time === t)) {
-          btn.classList.add("booked");
-          btn.textContent = t + "（先着がいます）";
-          btn.disabled = true;
-        } else {
-          btn.addEventListener("click", () => {
-            document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
-            btn.classList.add("selected");
-            selectedTime = t;
-            document.getElementById("reserveBtn").disabled = false;
-          });
+  function onDateClick(dateStr, btn){
+    dbg("date clicked: " + dateStr);
+    document.querySelectorAll('.date-btn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedDate = dateStr;
+    selectedTime = "";
+    document.getElementById('reserveBtn').disabled = true;
+    // まず全時間を表示（即座に）
+    renderSlots([], dateStr);
+    // その後fetchして上書き（エラーがあっても基本UIは表示される）
+    if (!USE_FETCH) {
+      dbg("USE_FETCH === false : skipping fetch");
+      return;
+    }
+    if (!GAS_URL || GAS_URL.indexOf("script.google.com") === -1) {
+      dbg("GAS_URL looks wrong or empty: " + GAS_URL);
+    }
+    const url = GAS_URL + "?date=" + encodeURIComponent(dateStr);
+    dbg("fetching -> " + url);
+    fetch(url, { method: 'GET', headers: { 'Accept': 'application/json' } })
+      .then(async res => {
+        dbg("fetch status: " + res.status + " " + res.statusText);
+        const text = await res.text();
+        dbg("fetch raw response: " + text);
+        try{
+          const data = JSON.parse(text);
+          dbg("parsed JSON length: " + (Array.isArray(data) ? data.length : 'not-array'));
+          renderSlots(data, dateStr);
+        }catch(err){
+          dbg("JSON parse error: " + err);
+          // 保険で空配列のままにする
+          renderSlots([], dateStr);
         }
-        container.appendChild(btn);
+      })
+      .catch(err => {
+        dbg("fetch error: " + err);
+        renderSlots([], dateStr);
       });
-    }
+  }
 
-    // 時間リスト作成
-    function generateTimes(start, end, step) {
-      const times = [];
-      let [h, m] = start.split(":").map(Number);
-      const [endH, endM] = end.split(":").map(Number);
+  // times は常に最初から表示。reservations で上書き（bookedにする）
+  function renderSlots(reservations, dateStr){
+    dbg("renderSlots() called for date=" + dateStr + " reservations.length=" + (reservations ? reservations.length : 0));
+    const container = document.getElementById('slots');
+    container.innerHTML = "";
+    const times = generateTimes("09:00","18:00",30);
 
-      while (h < endH || (h === endH && m <= endM)) {
-        times.push(String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0"));
-        m += step;
-        if (m >= 60) { h++; m -= 60; }
+    // normalize reservations: ensure each r.time is "HH:mm"
+    const bookedSet = new Set();
+    (reservations || []).forEach(r=>{
+      let t = r.time;
+      if (!t) return;
+      // if t looks like ISO date-from-sheets, try convert:
+      // example: "1899-12-30T00:30:00.000Z" OR Date object already stringified.
+      if (/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(String(t))) {
+        try {
+          const dt = new Date(t);
+          const hh = String(dt.getHours()).padStart(2,'0');
+          const mm = String(dt.getMinutes()).padStart(2,'0');
+          t = hh + ':' + mm;
+          dbg("converted ISO time to HH:mm -> " + t);
+        }catch(e){}
       }
-      return times;
-    }
+      // trim / only keep HH:MM
+      const m = String(t).match(/(\d{1,2}):(\d{2})/);
+      if (m) {
+        const hhmm = String(m[1]).padStart(2,'0') + ':' + m[2];
+        bookedSet.add(hhmm);
+      } else {
+        // unexpected format: add raw
+        bookedSet.add(String(t));
+      }
+    });
 
-    // 予約送信
-    document.getElementById("reserveForm").onsubmit = function(e) {
-      e.preventDefault();
-      const name = document.getElementById("name").value;
-      if (!selectedDate || !selectedTime) return;
+    times.forEach(t=>{
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'slot';
+      btn.textContent = t;
+      if (bookedSet.has(t)) {
+        btn.classList.add('booked');
+        btn.textContent = t + "（先着がいます）";
+        btn.disabled = true;
+      } else {
+        btn.addEventListener('click', ()=>{
+          document.querySelectorAll('.slot').forEach(s=>s.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedTime = t;
+          document.getElementById('reserveBtn').disabled = false;
+          dbg("time selected: " + t);
+        });
+      }
+      container.appendChild(btn);
+    });
+  }
 
-      fetch(GAS_URL, {
-        method: "POST",
-        body: JSON.stringify({ name, date: selectedDate, time: selectedTime })
-      })
-      .then(res => res.text())
-      .then(msg => {
-        document.getElementById("message").textContent = msg;
-      })
-      .catch(err => console.error(err));
+  function generateTimes(start, end, interval){
+    const out = [];
+    let [h,m] = start.split(':').map(Number);
+    const [eh, em] = end.split(':').map(Number);
+    while(h < eh || (h === eh && m <= em)){
+      out.push(String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0'));
+      m += interval;
+      if (m >= 60) { h++; m -= 60; }
     }
-  </script>
+    return out;
+  }
+
+  // 予約送信（簡易）
+  document.getElementById('reserveForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const name = document.getElementById('name').value;
+    if (!name) { alert('名前を入力してください'); return; }
+    if (!selectedDate || !selectedTime) { alert('日付と時間を選んでください'); return; }
+
+    const payload = { name: name, date: selectedDate, time: selectedTime };
+    dbg("POST -> " + GAS_URL + " payload: " + JSON.stringify(payload));
+
+    fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(async res => {
+      dbg("POST status: " + res.status);
+      const text = await res.text();
+      dbg("POST response: " + text);
+      document.getElementById('message').textContent = text;
+      // after successful post, re-fetch to update booked slots
+      try { onDateClick(selectedDate, document.querySelector('.date-btn.selected')); } catch(e){}
+    })
+    .catch(err => {
+      dbg("POST error: " + err);
+    });
+  });
+
+})(); // IIFE end
+</script>
 </body>
 </html>
