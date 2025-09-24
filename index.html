@@ -5,7 +5,7 @@
   <title>予約フォーム</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
     h2, h3 { margin-bottom: 10px; }
     label { display: block; margin-top: 10px; }
     input, button { padding: 8px; margin-top: 5px; width: 100%; }
@@ -32,7 +32,7 @@
   </form>
 
   <script>
-    const GAS_URL = "https://script.google.com/a/macros/ict.shimanet.ed.jp/s/AKfycbzgH1YtqG6z5Z5LYx9IyshoZ0u5Dl1rML92bm5hVhKQErBBncvDEdDW4a3ycIjk_r8i/exec"; // ←あなたのGASのURL
+    const GAS_URL = "https://script.google.com/a/macros/ict.shimanet.ed.jp/s/AKfycbwiRpiNGj8QJU1YBxSIop7nD0833bnSg5vOa_mDHWj6MmtEJsuLNdcbPWJo8H3ZVXWLwg/exec"; 
     let selectedDate = "";
     let selectedTime = "";
 
@@ -81,7 +81,7 @@
       }
     }
 
-    // 時間ボタン生成（常に表示・予約済みなら「先着がいます」）
+    // 時間ボタン生成
     function renderSlots(date, reservations) {
       const container = document.getElementById("slots");
       container.innerHTML = "";
@@ -93,60 +93,53 @@
         btn.textContent = t;
         btn.className = "slot";
 
+        // 予約済み時間は押せない＋「先着がいます」
         if (reservations.some(r => r.time === t)) {
           btn.classList.add("booked");
           btn.textContent = t + "（先着がいます）";
           btn.disabled = true;
         } else {
-          btn.onclick = () => {
+          btn.addEventListener("click", () => {
             document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
             btn.classList.add("selected");
             selectedTime = t;
             document.getElementById("reserveBtn").disabled = false;
-          };
+          });
         }
         container.appendChild(btn);
       });
     }
 
-    // 時間リスト生成（30分ごと）
-    function generateTimes(start, end, interval) {
+    // 時間リスト作成
+    function generateTimes(start, end, step) {
       const times = [];
       let [h, m] = start.split(":").map(Number);
-      const [eh, em] = end.split(":").map(Number);
+      const [endH, endM] = end.split(":").map(Number);
 
-      while (h < eh || (h === eh && m <= em)) {
+      while (h < endH || (h === endH && m <= endM)) {
         times.push(String(h).padStart(2,"0") + ":" + String(m).padStart(2,"0"));
-        m += interval;
-        if (m >= 60) { h++; m = 0; }
+        m += step;
+        if (m >= 60) { h++; m -= 60; }
       }
       return times;
     }
 
     // 予約送信
-    document.getElementById("reserveForm").addEventListener("submit", function(e){
+    document.getElementById("reserveForm").onsubmit = function(e) {
       e.preventDefault();
-      const data = {
-        name: document.getElementById("name").value,
-        date: selectedDate,
-        time: selectedTime
-      };
+      const name = document.getElementById("name").value;
+      if (!selectedDate || !selectedTime) return;
 
       fetch(GAS_URL, {
         method: "POST",
-        body: JSON.stringify(data)
+        body: JSON.stringify({ name, date: selectedDate, time: selectedTime })
       })
-      .then(res => res.json())
-      .then(res => {
-        document.getElementById("message").textContent = res.message;
-        if(res.success){
-          alert("予約が完了しました！");
-          liff.closeWindow();
-        } else {
-          alert(res.message);
-        }
-      });
-    });
+      .then(res => res.text())
+      .then(msg => {
+        document.getElementById("message").textContent = msg;
+      })
+      .catch(err => console.error(err));
+    }
   </script>
 </body>
 </html>
