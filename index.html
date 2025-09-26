@@ -32,9 +32,7 @@
   </form>
 
   <script>
-    // ★ あなたの GAS デプロイURL を指定
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbzADA2mpr5w4qZik40uieh921Aa8Fd8iLNYeX2RXGQPa2FJPpi7LIPaPN4psNXMuzxJdg/exec"; 
-
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzADA2mpr5w4qZik40uieh921Aa8Fd8iLNYeX2RXGQPa2FJPpi7LIPaPN4psNXMuzxJdg/exec"; // ★ここを差し替える
     let selectedDate = "";
     let selectedTime = "";
 
@@ -44,7 +42,7 @@
         .then(() => console.log("LIFF initialized"))
         .catch(err => console.error(err));
 
-      renderDates(); // ページ表示時に日付ボタンを作る
+      renderDates(); // ページ表示時に日付ボタンを作成
     }
 
     // 今日から2週間分の日付ボタンを作成
@@ -52,12 +50,12 @@
       const container = document.getElementById("dates");
       container.innerHTML = "";
       const today = new Date();
-      for (let i=0; i<14; i++) {
+      for (let i = 0; i < 14; i++) {
         const d = new Date(today);
         d.setDate(today.getDate() + i);
         const yyyy = d.getFullYear();
-        const mm = String(d.getMonth()+1).padStart(2,"0");
-        const dd = String(d.getDate()).padStart(2,"0");
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const dd = String(d.getDate()).padStart(2, "0");
         const dateStr = `${yyyy}-${mm}-${dd}`;
 
         const btn = document.createElement("button");
@@ -73,20 +71,21 @@
           document.getElementById("reserveBtn").disabled = true;
 
           // 予約状況取得
+          console.log("date clicked:", dateStr);
           fetch(GAS_URL + "?date=" + dateStr)
             .then(res => res.json())
             .then(data => {
-              console.log("fetch result for date=" + dateStr, data);
+              console.log("fetch raw response:", data);
               renderSlots(dateStr, data);
             })
-            .catch(err => console.error("fetch error:", err));
+            .catch(err => console.error("GET error:", err));
         };
 
         container.appendChild(btn);
       }
     }
 
-    // 時間ボタン生成
+    // 時間ボタン生成（すべての時間を表示、予約済みは無効化）
     function renderSlots(date, reservations) {
       const container = document.getElementById("slots");
       container.innerHTML = "";
@@ -100,19 +99,18 @@
         btn.textContent = t;
         btn.className = "slot";
 
-        // 予約済みチェック
+        // 予約済み時間は押せない
         if (reservations.some(r => r.time === t)) {
           btn.classList.add("booked");
-          btn.disabled = true;
           btn.textContent = t + "（先着がいます）";
+          btn.disabled = true;
         } else {
           btn.addEventListener("click", () => {
             document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
             btn.classList.add("selected");
             selectedTime = t;
-            if (selectedDate && selectedTime && document.getElementById("name").value.trim()) {
-              document.getElementById("reserveBtn").disabled = false;
-            }
+            document.getElementById("reserveBtn").disabled = false;
+            console.log("time selected:", t);
           });
         }
 
@@ -120,49 +118,59 @@
       });
     }
 
-    // 時間を 30分刻みで生成
-    function generateTimes(start, end, interval) {
-      const times = [];
+    // 時間帯生成
+    function generateTimes(start, end, intervalMinutes) {
+      const result = [];
       let [sh, sm] = start.split(":").map(Number);
       let [eh, em] = end.split(":").map(Number);
-      let startMin = sh*60 + sm;
-      let endMin = eh*60 + em;
+      let cur = new Date();
+      cur.setHours(sh, sm, 0, 0);
+      const endTime = new Date();
+      endTime.setHours(eh, em, 0, 0);
 
-      for (let m = startMin; m <= endMin; m += interval) {
-        const hh = String(Math.floor(m/60)).padStart(2,"0");
-        const mm = String(m%60).padStart(2,"0");
-        times.push(`${hh}:${mm}`);
+      while (cur <= endTime) {
+        result.push(
+          String(cur.getHours()).padStart(2, "0") + ":" +
+          String(cur.getMinutes()).padStart(2, "0")
+        );
+        cur.setMinutes(cur.getMinutes() + intervalMinutes);
       }
-      return times;
+      return result;
     }
 
-    // 予約送信
-    document.getElementById("reserveForm").addEventListener("submit", function(e) {
+    // 予約ボタン押下
+    document.getElementById("reserveBtn").addEventListener("click", function (e) {
       e.preventDefault();
-      const name = document.getElementById("name").value.trim();
-      if (!name || !selectedDate || !selectedTime) {
-        document.getElementById("message").textContent = "名前・日付・時間を選択してください";
+      if (!selectedDate || !selectedTime) return;
+
+      const name = document.getElementById("name").value;
+      if (!name) {
+        alert("名前を入力してください");
         return;
       }
 
       const payload = { name, date: selectedDate, time: selectedTime };
-      console.log("POST payload:", payload);
+      console.log("POST ->", GAS_URL, "payload:", JSON.stringify(payload));
 
       fetch(GAS_URL, {
         method: "POST",
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "application/json" },
       })
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("message").textContent = data.message;
-        if (data.success) {
-          document.getElementById("reserveBtn").disabled = true;
-        }
-      })
-      .catch(err => {
-        console.error("POST error:", err);
-        document.getElementById("message").textContent = "送信エラーが発生しました";
-      });
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("POST response:", data);
+          if (data.success) {
+            alert("予約が完了しました！");
+            document.getElementById("reserveBtn").disabled = true;
+          } else {
+            alert(data.message || "予約に失敗しました");
+          }
+        })
+        .catch((err) => {
+          console.error("POST error:", err);
+          alert("通信エラーが発生しました");
+        });
     });
   </script>
 </body>
