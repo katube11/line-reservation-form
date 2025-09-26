@@ -1,177 +1,200 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>予約フォーム</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
-    h2, h3 { margin-bottom: 10px; }
-    label { display: block; margin-top: 10px; }
-    input, button { padding: 8px; margin-top: 5px; width: 100%; }
-    button.primary { background: #06c755; color: white; border: none; border-radius: 6px; cursor: pointer; }
-    .slot, .date-btn { display: inline-block; margin: 4px; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; }
-    .slot.booked { background: #ddd; cursor: not-allowed; }
-    .slot.selected, .date-btn.selected { background: #06c755; color: #fff; }
-    .msg { margin-top: 10px; }
+    body{font-family:sans-serif;padding:16px;max-width:600px;margin:auto}
+    label{display:block;margin-top:8px}
+    .date-btn,.slot{display:inline-block;margin:4px;padding:8px 12px;border:1px solid #ccc;border-radius:6px;cursor:pointer}
+    .date-btn.selected,.slot.selected{background:#06c755;color:#fff}
+    .slot.booked{background:#eee;color:#999;cursor:not-allowed}
+    .primary{display:block;width:100%;padding:10px;border-radius:8px;border:0;background:#06c755;color:#fff;margin-top:12px}
+    #message{margin-top:10px;color:#d00}
   </style>
 </head>
 <body>
   <h2>予約フォーム</h2>
-  <form id="reserveForm">
-    <label>名前: <input type="text" id="name" required></label>
 
-    <h3>日付を選択</h3>
-    <div id="dates"></div>
+  <label>名前：<input id="name" type="text" placeholder="山田太郎" /></label>
 
-    <h3>時間を選択</h3>
-    <div id="slots"></div>
+  <h3>日付を選択</h3>
+  <div id="dates"></div>
 
-    <button id="reserveBtn" class="primary" disabled>予約する</button>
-    <div class="msg" id="message"></div>
-  </form>
+  <h3>時間を選択</h3>
+  <div id="slots"></div>
 
-  <script>
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbyqzvbf7BT3QaVS4uReMEVtW9yO4Cp6MXM7yLURbHzE7a2uanLFeMO7T0Ze1NPOcacIJw/exec"; // ★ここを差し替える
-    let selectedDate = "";
-    let selectedTime = "";
+  <button id="reserveBtn" class="primary" disabled>予約する</button>
+  <div id="message"></div>
 
-    // LIFF初期化
-    window.onload = function () {
-      liff.init({ liffId: "2008012264-GAaEPJdZ" })
-        .then(() => console.log("LIFF initialized"))
-        .catch(err => console.error(err));
+<script>
+(() => {
+  // ★ ここをあなたの GAS デプロイURL に置き換えてください
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbx_8bNNAMKXO-P_ec45_8Fwk4ftW3FMIQszsYsuKEmpZYlLlutebZB-8R-i2KuseeyWGQ/exec";
+  // ★ あれば LIFF_ID を指定（なくても動く）
+  const LIFF_ID = "2008012264-GAaEPJdZ";
 
-      renderDates(); // ページ表示時に日付ボタンを作成
-    }
+  let selectedDate = "";
+  let selectedTime = "";
 
-    // 今日から2週間分の日付ボタンを作成
-    function renderDates() {
-      const container = document.getElementById("dates");
-      container.innerHTML = "";
-      const today = new Date();
-      for (let i = 0; i < 14; i++) {
-        const d = new Date(today);
-        d.setDate(today.getDate() + i);
-        const yyyy = d.getFullYear();
-        const mm = String(d.getMonth() + 1).padStart(2, "0");
-        const dd = String(d.getDate()).padStart(2, "0");
-        const dateStr = `${yyyy}-${mm}-${dd}`;
-
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "date-btn";
-        btn.textContent = dateStr;
-
-        btn.onclick = () => {
-          document.querySelectorAll(".date-btn").forEach(el => el.classList.remove("selected"));
-          btn.classList.add("selected");
-          selectedDate = dateStr;
-          selectedTime = "";
-          document.getElementById("reserveBtn").disabled = true;
-
-          // 予約状況取得
-          console.log("date clicked:", dateStr);
-          fetch(GAS_URL + "?date=" + dateStr)
-            .then(res => res.json())
-            .then(data => {
-              console.log("fetch raw response:", data);
-              renderSlots(dateStr, data);
-            })
-            .catch(err => console.error("GET error:", err));
-        };
-
-        container.appendChild(btn);
+  // LIFF 初期化（失敗しても UI は動くように例外を吸収）
+  window.addEventListener('load', async () => {
+    try {
+      if (window.liff && LIFF_ID) {
+        await liff.init({ liffId: LIFF_ID });
+        console.log("LIFF initialized");
       }
+    } catch (e) {
+      console.warn("LIFF init failed:", e);
     }
+    renderDates();
+  });
 
-    // 時間ボタン生成（すべての時間を表示、予約済みは無効化）
-    function renderSlots(date, reservations) {
-      const container = document.getElementById("slots");
-      container.innerHTML = "";
-      const times = generateTimes("09:00", "18:00", 30);
-
-      console.log("renderSlots() called for date=" + date + " reservations.length=" + reservations.length);
-
-      times.forEach(t => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.textContent = t;
-        btn.className = "slot";
-
-        // 予約済み時間は押せない
-        if (reservations.some(r => r.time === t)) {
-          btn.classList.add("booked");
-          btn.textContent = t + "（先着がいます）";
-          btn.disabled = true;
-        } else {
-          btn.addEventListener("click", () => {
-            document.querySelectorAll(".slot").forEach(s => s.classList.remove("selected"));
-            btn.classList.add("selected");
-            selectedTime = t;
-            document.getElementById("reserveBtn").disabled = false;
-            console.log("time selected:", t);
-          });
-        }
-
-        container.appendChild(btn);
-      });
+  // 日付ボタン（今日から14日）
+  function renderDates() {
+    const container = document.getElementById('dates');
+    container.innerHTML = '';
+    const today = new Date();
+    for (let i=0; i<14; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      const dateStr = d.toISOString().slice(0,10);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'date-btn';
+      btn.textContent = dateStr;
+      btn.addEventListener('click', () => onDateClick(dateStr, btn));
+      container.appendChild(btn);
     }
+  }
 
-    // 時間帯生成
-    function generateTimes(start, end, intervalMinutes) {
-      const result = [];
-      let [sh, sm] = start.split(":").map(Number);
-      let [eh, em] = end.split(":").map(Number);
-      let cur = new Date();
-      cur.setHours(sh, sm, 0, 0);
-      const endTime = new Date();
-      endTime.setHours(eh, em, 0, 0);
-
-      while (cur <= endTime) {
-        result.push(
-          String(cur.getHours()).padStart(2, "0") + ":" +
-          String(cur.getMinutes()).padStart(2, "0")
-        );
-        cur.setMinutes(cur.getMinutes() + intervalMinutes);
-      }
-      return result;
-    }
-
-    // 予約ボタン押下
-    document.getElementById("reserveBtn").addEventListener("click", function (e) {
-      e.preventDefault();
-      if (!selectedDate || !selectedTime) return;
-
-      const name = document.getElementById("name").value;
-      if (!name) {
-        alert("名前を入力してください");
-        return;
-      }
-
-      const payload = { name, date: selectedDate, time: selectedTime };
-      console.log("POST ->", GAS_URL, "payload:", JSON.stringify(payload));
-
-      fetch(GAS_URL, {
-        method: "POST",
-        body: JSON.stringify(payload),
-        headers: { "Content-Type": "application/json" },
+  function onDateClick(dateStr, btn) {
+    document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedDate = dateStr;
+    selectedTime = "";
+    document.getElementById('reserveBtn').disabled = true;
+    // まず全スロットを表示（空き）
+    renderSlots([], dateStr);
+    // その後バックエンドに問い合わせて予約を反映
+    fetch(GAS_URL + "?date=" + encodeURIComponent(dateStr))
+      .then(r => {
+        console.log("GET status:", r.status);
+        return r.json();
       })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log("POST response:", data);
-          if (data.success) {
-            alert("予約が完了しました！");
-            document.getElementById("reserveBtn").disabled = true;
-          } else {
-            alert(data.message || "予約に失敗しました");
-          }
-        })
-        .catch((err) => {
-          console.error("POST error:", err);
-          alert("通信エラーが発生しました");
-        });
+      .then(data => {
+        console.log("GET data:", data);
+        renderSlots(data, dateStr);
+      })
+      .catch(err => {
+        console.error("GET error:", err);
+        // エラーでも UI は空き表示を維持
+        renderSlots([], dateStr);
+        document.getElementById('message').textContent = "サーバー接続エラー（予約状況が読み取れません）";
+      });
+  }
+
+  // スロット描画（reservations: [{date,time}, ...]）
+  function renderSlots(reservations, dateStr) {
+    const container = document.getElementById('slots');
+    container.innerHTML = '';
+    const times = generateTimes("09:00","18:00",30);
+    // normalize予約時刻セット
+    const booked = new Set();
+    (reservations || []).forEach(r => {
+      if (!r || !r.time) return;
+      const m = String(r.time).match(/(\d{1,2}):(\d{2})/);
+      if (m) booked.add(String(m[1]).padStart(2,'0') + ':' + m[2]);
+      else booked.add(r.time);
     });
-  </script>
+
+    times.forEach(t => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'slot';
+      btn.textContent = t;
+      if (booked.has(t)) {
+        btn.classList.add('booked');
+        btn.textContent = t + "（先着がいます）";
+        btn.disabled = true;
+      } else {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedTime = t;
+          // 名前が入力済みならボタン有効化
+          if (document.getElementById('name').value.trim()) {
+            document.getElementById('reserveBtn').disabled = false;
+            document.getElementById('message').textContent = "";
+          }
+        });
+      }
+      container.appendChild(btn);
+    });
+  }
+
+  // 時間生成
+  function generateTimes(start, end, step){
+    const out = [];
+    let [sh, sm] = start.split(':').map(Number);
+    let [eh, em] = end.split(':').map(Number);
+    let curMin = sh*60 + sm;
+    const endMin = eh*60 + em;
+    while(curMin <= endMin){
+      const hh = String(Math.floor(curMin/60)).padStart(2,'0');
+      const mm = String(curMin % 60).padStart(2,'0');
+      out.push(`${hh}:${mm}`);
+      curMin += step;
+    }
+    return out;
+  }
+
+  // 予約ボタン動作 — フォーム送信形式（application/x-www-form-urlencoded）で送る（プリフライト回避）
+  document.getElementById('reserveBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim();
+    if (!name) { alert('名前を入力してください'); return; }
+    if (!selectedDate || !selectedTime) { alert('日付・時間を選んでください'); return; }
+
+    // URLSearchParams を使って form-encoded 文字列を作る
+    const form = new URLSearchParams();
+    form.append('name', name);
+    form.append('date', selectedDate);
+    form.append('time', selectedTime);
+
+    console.log("POST ->", GAS_URL, "payload:", form.toString());
+
+    fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+      body: form.toString()
+    })
+    .then(async res => {
+      console.log("POST status:", res.status);
+      const text = await res.text();
+      console.log("POST raw response:", text);
+      try {
+        const data = JSON.parse(text);
+        if (data.success) {
+          alert('予約が完了しました！');
+          // 成功したら再取得して画面更新
+          onDateClick(selectedDate, document.querySelector('.date-btn.selected'));
+        } else {
+          alert(data.message || '予約に失敗しました');
+        }
+      } catch(err) {
+        console.error("POST parse error:", err);
+        alert('サーバー応答が不正です');
+      }
+    })
+    .catch(err => {
+      console.error("POST error:", err);
+      alert('通信エラーが発生しました');
+    });
+  });
+
+})();
+</script>
 </body>
 </html>
