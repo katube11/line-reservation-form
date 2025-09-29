@@ -5,196 +5,257 @@
   <title>予約フォーム</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
-    body{font-family:sans-serif;padding:16px;max-width:600px;margin:auto}
-    label{display:block;margin-top:8px}
-    .date-btn,.slot{display:inline-block;margin:4px;padding:8px 12px;border:1px solid #ccc;border-radius:6px;cursor:pointer}
-    .date-btn.selected,.slot.selected{background:#06c755;color:#fff}
-    .slot.booked{background:#eee;color:#999;cursor:not-allowed}
-    .primary{display:block;width:100%;padding:10px;border-radius:8px;border:0;background:#06c755;color:#fff;margin-top:12px}
-    #message{margin-top:10px;color:#d00}
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 24px;
+      max-width: 500px;
+      width: 100%;
+    }
+    h2, h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: 500;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 4px;
+      font-size: 16px;
+    }
+    .date-btn, .slot {
+      display: inline-block;
+      margin: 6px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      transition: all 0.2s;
+      min-width: 100px;
+      text-align: center;
+    }
+    .date-btn:hover:not(.selected), .slot:hover:not(.selected) {
+      background: #e0f7fa;
+    }
+    .date-btn.selected, .slot.selected {
+      background: #0288d1;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0,136,209,0.3);
+    }
+    .slot.booked {
+      background: #eee;
+      color: #aaa;
+      cursor: not-allowed;
+      text-decoration: line-through;
+    }
+    .primary {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: 0;
+      background: #06c755;
+      color: #fff;
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .primary:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+    .primary:hover:not(:disabled) {
+      background: #05a646;
+    }
+    #message {
+      margin-top: 12px;
+      color: #d00;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
-  <h2>予約フォーム</h2>
+  <div class="container">
+    <h2>予約フォーム</h2>
 
-  <label>名前：<input id="name" type="text" placeholder="山田太郎" /></label>
+    <label>名前：<input id="name" type="text" placeholder="山田太郎" /></label>
 
-  <h3>日付を選択</h3>
-  <div id="dates"></div>
+    <h3>日付を選択</h3>
+    <div id="dates"></div>
 
-  <h3>時間を選択</h3>
-  <div id="slots"></div>
+    <h3>時間を選択</h3>
+    <div id="slots"></div>
 
-  <button id="reserveBtn" class="primary" disabled>予約する</button>
-  <div id="message"></div>
+    <button id="reserveBtn" class="primary" disabled>予約する</button>
+    <div id="message"></div>
+  </div>
 
-<script>
-(() => {
-  // ★ ここをあなたの GAS デプロイURL に置き換えてください
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbwV9E-5f4lQ6fFxsCDKe2cm_QmwPa6UVd6G3AdPpI59_9rIx9b9S9ACU4Iet-dwaSDmcw/exec";
-  // ★ あれば LIFF_ID を指定（なくても動く）
-  const LIFF_ID = "2008012264-GAaEPJdZ";
+  <script>
+    (() => {
+      const GAS_URL = "https://script.google.com/macros/s/AKfycbwV9E-5f4lQ6fFxsCDKe2cm_QmwPa6UVd6G3AdPpI59_9rIx9b9S9ACU4Iet-dwaSDmcw/exec";
+      const LIFF_ID = "2008012264-GAaEPJdZ";
 
-  let selectedDate = "";
-  let selectedTime = "";
+      let selectedDate = "";
+      let selectedTime = "";
 
-  // LIFF 初期化（失敗しても UI は動くように例外を吸収）
-  window.addEventListener('load', async () => {
-    try {
-      if (window.liff && LIFF_ID) {
-        await liff.init({ liffId: LIFF_ID });
-        console.log("LIFF initialized");
-      }
-    } catch (e) {
-      console.warn("LIFF init failed:", e);
-    }
-    renderDates();
-  });
-
-  // 日付ボタン（今日から14日）
-  function renderDates() {
-    const container = document.getElementById('dates');
-    container.innerHTML = '';
-    const today = new Date();
-    for (let i=0; i<14; i++) {
-      const d = new Date(today);
-      d.setDate(today.getDate() + i);
-      const dateStr = d.toISOString().slice(0,10);
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'date-btn';
-      btn.textContent = dateStr;
-      btn.addEventListener('click', () => onDateClick(dateStr, btn));
-      container.appendChild(btn);
-    }
-  }
-
-  function onDateClick(dateStr, btn) {
-    document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    selectedDate = dateStr;
-    selectedTime = "";
-    document.getElementById('reserveBtn').disabled = true;
-    // まず全スロットを表示（空き）
-    renderSlots([], dateStr);
-    // その後バックエンドに問い合わせて予約を反映
-    fetch(GAS_URL + "?date=" + encodeURIComponent(dateStr))
-      .then(r => {
-        console.log("GET status:", r.status);
-        return r.json();
-      })
-      .then(data => {
-        console.log("GET data:", data);
-        renderSlots(data, dateStr);
-      })
-      .catch(err => {
-        console.error("GET error:", err);
-        // エラーでも UI は空き表示を維持
-        renderSlots([], dateStr);
-        document.getElementById('message').textContent = "サーバー接続エラー（予約状況が読み取れません）";
-      });
-  }
-
-  // スロット描画（reservations: [{date,time}, ...]）
-  function renderSlots(reservations, dateStr) {
-    const container = document.getElementById('slots');
-    container.innerHTML = '';
-    const times = generateTimes("09:00","18:00",30);
-    // normalize予約時刻セット
-    const booked = new Set();
-    (reservations || []).forEach(r => {
-      if (!r || !r.time) return;
-      const m = String(r.time).match(/(\d{1,2}):(\d{2})/);
-      if (m) booked.add(String(m[1]).padStart(2,'0') + ':' + m[2]);
-      else booked.add(r.time);
-    });
-
-    times.forEach(t => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'slot';
-      btn.textContent = t;
-      if (booked.has(t)) {
-        btn.classList.add('booked');
-        btn.textContent = t + "（先着がいます）";
-        btn.disabled = true;
-      } else {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
-          btn.classList.add('selected');
-          selectedTime = t;
-          // 名前が入力済みならボタン有効化
-          if (document.getElementById('name').value.trim()) {
-            document.getElementById('reserveBtn').disabled = false;
-            document.getElementById('message').textContent = "";
+      window.addEventListener('load', async () => {
+        try {
+          if (window.liff && LIFF_ID) {
+            await liff.init({ liffId: LIFF_ID });
+            console.log("LIFF initialized");
           }
+        } catch (e) {
+          console.warn("LIFF init failed:", e);
+        }
+        renderDates();
+      });
+
+      function renderDates() {
+        const container = document.getElementById('dates');
+        container.innerHTML = '';
+        const today = new Date();
+        for (let i=0; i<14; i++) {
+          const d = new Date(today);
+          d.setDate(today.getDate() + i);
+          const dateStr = d.toISOString().slice(0,10);
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'date-btn';
+          btn.textContent = dateStr;
+          btn.addEventListener('click', () => onDateClick(dateStr, btn));
+          container.appendChild(btn);
+        }
+      }
+
+      function onDateClick(dateStr, btn) {
+        document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedDate = dateStr;
+        selectedTime = "";
+        document.getElementById('reserveBtn').disabled = true;
+        renderSlots([], dateStr);
+        fetch(GAS_URL + "?date=" + encodeURIComponent(dateStr))
+          .then(r => r.json())
+          .then(data => renderSlots(data, dateStr))
+          .catch(err => {
+            console.error(err);
+            renderSlots([], dateStr);
+            document.getElementById('message').textContent = "サーバー接続エラー（予約状況が読み取れません）";
+          });
+      }
+
+      function renderSlots(reservations, dateStr) {
+        const container = document.getElementById('slots');
+        container.innerHTML = '';
+        const times = generateTimes("09:00","18:00",30);
+        const booked = new Set();
+        (reservations || []).forEach(r => {
+          if (!r || !r.time) return;
+          const m = String(r.time).match(/(\d{1,2}):(\d{2})/);
+          if (m) booked.add(String(m[1]).padStart(2,'0') + ':' + m[2]);
+          else booked.add(r.time);
+        });
+
+        times.forEach(t => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'slot';
+          btn.textContent = t;
+          if (booked.has(t)) {
+            btn.classList.add('booked');
+            btn.textContent = t + "（先着がいます）";
+            btn.disabled = true;
+          } else {
+            btn.addEventListener('click', () => {
+              document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+              btn.classList.add('selected');
+              selectedTime = t;
+              if (document.getElementById('name').value.trim()) {
+                document.getElementById('reserveBtn').disabled = false;
+                document.getElementById('message').textContent = "";
+              }
+            });
+          }
+          container.appendChild(btn);
         });
       }
-      container.appendChild(btn);
-    });
-  }
 
-  // 時間生成
-  function generateTimes(start, end, step){
-    const out = [];
-    let [sh, sm] = start.split(':').map(Number);
-    let [eh, em] = end.split(':').map(Number);
-    let curMin = sh*60 + sm;
-    const endMin = eh*60 + em;
-    while(curMin <= endMin){
-      const hh = String(Math.floor(curMin/60)).padStart(2,'0');
-      const mm = String(curMin % 60).padStart(2,'0');
-      out.push(`${hh}:${mm}`);
-      curMin += step;
-    }
-    return out;
-  }
-
-  // 予約ボタン動作 — フォーム送信形式（application/x-www-form-urlencoded）で送る（プリフライト回避）
-  document.getElementById('reserveBtn').addEventListener('click', function(e){
-    e.preventDefault();
-    const name = document.getElementById('name').value.trim();
-    if (!name) { alert('名前を入力してください'); return; }
-    if (!selectedDate || !selectedTime) { alert('日付・時間を選んでください'); return; }
-
-    // URLSearchParams を使って form-encoded 文字列を作る
-    const form = new URLSearchParams();
-    form.append('name', name);
-    form.append('date', selectedDate);
-    form.append('time', selectedTime);
-
-    console.log("POST ->", GAS_URL, "payload:", form.toString());
-
-    fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-      body: form.toString()
-    })
-    .then(async res => {
-      console.log("POST status:", res.status);
-      const text = await res.text();
-      console.log("POST raw response:", text);
-      try {
-        const data = JSON.parse(text);
-        if (data.success) {
-          alert('予約が完了しました！');
-          // 成功したら再取得して画面更新
-          onDateClick(selectedDate, document.querySelector('.date-btn.selected'));
-        } else {
-          alert(data.message || '予約に失敗しました');
+      function generateTimes(start, end, step){
+        const out = [];
+        let [sh, sm] = start.split(':').map(Number);
+        let [eh, em] = end.split(':').map(Number);
+        let curMin = sh*60 + sm;
+        const endMin = eh*60 + em;
+        while(curMin <= endMin){
+          const hh = String(Math.floor(curMin/60)).padStart(2,'0');
+          const mm = String(curMin % 60).padStart(2,'0');
+          out.push(`${hh}:${mm}`);
+          curMin += step;
         }
-      } catch(err) {
-        console.error("POST parse error:", err);
-        alert('サーバー応答が不正です');
+        return out;
       }
-    })
-    .catch(err => {
-      console.error("POST error:", err);
-      alert('通信エラーが発生しました');
-    });
-  });
 
-})();
-</script>
+      document.getElementById('reserveBtn').addEventListener('click', function(e){
+        e.preventDefault();
+        const name = document.getElementById('name').value.trim();
+        if (!name) { alert('名前を入力してください'); return; }
+        if (!selectedDate || !selectedTime) { alert('日付・時間を選んでください'); return; }
+
+        const form = new URLSearchParams();
+        form.append('name', name);
+        form.append('date', selectedDate);
+        form.append('time', selectedTime);
+
+        fetch(GAS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+          body: form.toString()
+        })
+        .then(async res => {
+          const text = await res.text();
+          try {
+            const data = JSON.parse(text);
+            if (data.success) {
+              alert('予約が完了しました！');
+              onDateClick(selectedDate, document.querySelector('.date-btn.selected'));
+            } else {
+              alert(data.message || '予約に失敗しました');
+            }
+          } catch(err) {
+            console.error(err);
+            alert('サーバー応答が不正です');
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          alert('通信エラーが発生しました');
+        });
+      });
+
+      document.getElementById('name').addEventListener('input', () => {
+        const btn = document.getElementById('reserveBtn');
+        btn.disabled = !(document.getElementById('name').value.trim() && selectedDate && selectedTime);
+      });
+
+    })();
+  </script>
 </body>
 </html>
