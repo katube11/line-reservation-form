@@ -193,25 +193,35 @@
 
     // 予約送信
     document.getElementById("reserveForm").addEventListener("submit", function(e){
-      e.preventDefault();
-      const data = { name: document.getElementById("name").value, date: selectedDate, time: selectedTime };
+  e.preventDefault();
+  const data = { 
+    name: document.getElementById("name").value.trim(), 
+    date: selectedDate, 
+    time: selectedTime 
+  };
 
-      fetch(GAS_URL, {
-        method: "POST",
-        body: JSON.stringify(data)
-      })
-      .then(res => res.json())
-      .then(res => {
-        document.getElementById("message").textContent = res.message;
-        if(res.success){
-          alert("✅ " + res.message);
-          liff.closeWindow();
-        } else {
-          alert("⚠️ " + res.message);
-        }
-      })
-      .catch(() => alert("通信エラーが発生しました"));
-    });
+  console.log("送信データ:", data);  // ← デバッグ出力
+  if (!data.name || !data.date || !data.time) {
+    alert("⚠️ 名前・日付・時間をすべて選択してください");
+    return;
+  }
+
+  fetch(GAS_URL, {
+    method: "POST",
+    body: JSON.stringify(data)
+  })
+  .then(res => res.json())
+  .then(res => {
+    document.getElementById("message").textContent = res.message;
+    if(res.success){
+      alert("✅ " + res.message);
+      liff.closeWindow();
+    } else {
+      alert("⚠️ " + res.message);
+    }
+  })
+  .catch(() => alert("通信エラーが発生しました"));
+});
   </script>
 </body>
 </html>
