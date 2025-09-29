@@ -200,10 +200,9 @@
     time: selectedTime 
   };
 
-  console.log("送信データ:", data); // ← ここで送信前のデータを確認！
-
   fetch(GAS_URL, {
     method: "POST",
+    headers: { "Content-Type": "application/json" }, // これを追加
     body: JSON.stringify(data)
   })
   .then(res => res.json())
