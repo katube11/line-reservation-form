@@ -194,26 +194,20 @@
     // 予約送信
     document.getElementById("reserveForm").addEventListener("submit", function(e){
   e.preventDefault();
-  console.log("✅ フォーム送信イベント発火");  // ← 追加
-
   const data = { 
     name: document.getElementById("name").value, 
     date: selectedDate, 
     time: selectedTime 
   };
 
-  console.log("送信データ:", data);  // ← ここで確認
+  console.log("送信データ:", data); // ← ここで送信前のデータを確認！
 
   fetch(GAS_URL, {
     method: "POST",
     body: JSON.stringify(data)
   })
+  .then(res => res.json())
   .then(res => {
-    console.log("fetch status:", res.status);  // ← ステータス確認
-    return res.json();
-  })
-  .then(res => {
-    console.log("レスポンス:", res);  // ← サーバー応答を確認
     document.getElementById("message").textContent = res.message;
     if(res.success){
       alert("✅ " + res.message);
@@ -222,10 +216,7 @@
       alert("⚠️ " + res.message);
     }
   })
-  .catch(err => {
-    console.error("fetchエラー:", err);
-    alert("通信エラーが発生しました");
-  });
+  .catch(() => alert("通信エラーが発生しました"));
 });
   </script>
 </body>
