@@ -21,22 +21,18 @@
       max-width: 500px;
       width: 100%;
     }
-    h2 { font-size: 28px; margin-top: 0; color: #333; }
-    h3 { font-size: 20px; margin-top: 16px; color: #333; }
+    h2 { font-size: 26px; margin-top: 0; color: #333; }
+    h3 { font-size: 20px; margin-top: 20px; color: #333; }
     label { display: block; margin-top: 12px; font-weight: 500; font-size: 18px; }
     input[type="text"] {
       width: 100%; padding: 14px; border-radius: 10px;
       border: 1px solid #ccc; margin-top: 6px; font-size: 18px;
     }
-    .scroll-container {
-      display: flex; overflow-x: auto; padding-bottom: 10px; margin-bottom: 16px;
-    }
     .date-btn, .slot {
-      flex: 0 0 auto; margin: 6px; padding: 14px 20px;
+      display: block; width: 100%; margin: 8px 0; padding: 14px;
       border-radius: 12px; border: 1px solid #ccc;
       cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-      transition: all 0.2s; min-width: 120px; height: 50px;
-      font-size: 18px; text-align: center; white-space: nowrap;
+      transition: all 0.2s; font-size: 18px; text-align: center;
     }
     .date-btn.selected, .slot.selected {
       background: #0288d1; color: #fff;
@@ -62,10 +58,10 @@
     <label>名前：<input id="name" type="text" placeholder="山田太郎" /></label>
 
     <h3>日付を選択</h3>
-    <div id="dates" class="scroll-container"></div>
+    <div id="dates"></div>
 
     <h3>時間を選択</h3>
-    <div id="slots" class="scroll-container"></div>
+    <div id="slots"></div>
 
     <button id="reserveBtn" class="primary" disabled>予約する</button>
     <div id="message"></div>
