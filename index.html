@@ -28,184 +28,189 @@
       width: 100%; padding: 14px; border-radius: 10px;
       border: 1px solid #ccc; margin-top: 6px; font-size: 18px;
     }
+    /* 2列レイアウト */
+    #dates {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
     .date-btn, .slot {
-      display: block; width: 100%; margin: 8px 0; padding: 14px;
-      border-radius: 12px; border: 1px solid #ccc;
-      cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-      transition: all 0.2s; font-size: 18px; text-align: center;
+      display: block;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-align: center;
+      font-size: 16px;
+      transition: all 0.2s;
     }
     .date-btn.selected, .slot.selected {
       background: #0288d1; color: #fff;
-      box-shadow: 0 5px 15px rgba(0,136,209,0.3);
+      box-shadow: 0 5px 12px rgba(0,136,209,0.3);
     }
     .slot.booked {
       background: #000; color: #fff;
       cursor: not-allowed;
     }
+    .slot { margin-top: 8px; }
     .primary {
       display: block; width: 100%; padding: 16px;
       border-radius: 12px; border: 0; background: #06c755; color: #fff;
       margin-top: 24px; font-size: 20px; font-weight: bold; cursor: pointer;
     }
     .primary:disabled { background: #aaa; cursor: not-allowed; }
+    #slots { margin-top: 12px; }
     #message { margin-top: 14px; color: #d00; font-weight: 500; font-size: 16px; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>予約フォーム</h2>
+<div class="container">
+  <h2>予約フォーム</h2>
+  <label>名前：<input id="name" type="text" placeholder="山田太郎" /></label>
 
-    <label>名前：<input id="name" type="text" placeholder="山田太郎" /></label>
+  <h3>日付を選択</h3>
+  <div id="dates"></div>
 
-    <h3>日付を選択</h3>
-    <div id="dates"></div>
+  <h3>時間を選択</h3>
+  <div id="slots"></div>
 
-    <h3>時間を選択</h3>
-    <div id="slots"></div>
+  <button id="reserveBtn" class="primary" disabled>予約する</button>
+  <div id="message"></div>
+</div>
 
-    <button id="reserveBtn" class="primary" disabled>予約する</button>
-    <div id="message"></div>
-  </div>
+<script>
+const GAS_URL = "https://script.google.com/a/macros/ict.shimanet.ed.jp/s/AKfycbzcM5c3kK14nycHdlHkvF2qF6tT2BCk35SQJctea-4DDzs_9vAf6XVMdcYGyRO7-C-UZQ/exec";
 
-  <script>
-    const GAS_URL = "https://script.google.com/a/macros/ict.shimanet.ed.jp/s/AKfycbzcM5c3kK14nycHdlHkvF2qF6tT2BCk35SQJctea-4DDzs_9vAf6XVMdcYGyRO7-C-UZQ/exec";
+const datesEl = document.getElementById('dates');
+const slotsEl = document.getElementById('slots');
+const reserveBtn = document.getElementById('reserveBtn');
+const messageEl = document.getElementById('message');
+const nameEl = document.getElementById('name');
 
-    const datesEl = document.getElementById('dates');
-    const slotsEl = document.getElementById('slots');
-    const reserveBtn = document.getElementById('reserveBtn');
-    const messageEl = document.getElementById('message');
-    const nameEl = document.getElementById('name');
+let selectedDate = null;
+let selectedSlot = null;
 
-    let selectedDate = null;
-    let selectedSlot = null;
-
-    // 日付を14日分生成（今日から2週間分）
-    function renderDates() {
-      const today = new Date();
-      for (let i=0; i<14; i++) {
-        const d = new Date(today);
-        d.setDate(today.getDate() + i);
-        const dateStr = d.toISOString().slice(0,10);
-        const btn = document.createElement('div');
-        btn.className = 'date-btn';
-        btn.innerText = dateStr;
-        btn.onclick = () => {
-          selectedDate = dateStr;
-          selectedSlot = null;
-          renderDatesSelected();
-          fetchReservations(dateStr);
-          updateButton();
-        };
-        datesEl.appendChild(btn);
-      }
-    }
-
-    function renderDatesSelected() {
-      [...datesEl.children].forEach(btn => {
-        btn.classList.toggle('selected', btn.innerText === selectedDate);
-      });
-    }
-
-    // サーバーから予約状況を取得
-    function fetchReservations(dateStr) {
-      fetch(GAS_URL + "?date=" + encodeURIComponent(dateStr))
-        .then(res => res.json())
-        .then(data => {
-          renderSlots(data, dateStr);
-        })
-        .catch(err => {
-          console.error("GET error:", err);
-          messageEl.innerText = "サーバー接続エラー";
-        });
-    }
-
-    // 時間枠生成（09:00〜17:00を30分刻み固定）
-    function generateTimes() {
-      const out = [];
-      let start = 9 * 60;   // 9:00
-      let end = 17 * 60;    // 17:00
-      let step = 30;
-      for (let cur = start; cur <= end; cur += step) {
-        const hh = String(Math.floor(cur / 60)).padStart(2,'0');
-        const mm = String(cur % 60).padStart(2,'0');
-        out.push(`${hh}:${mm}`);
-      }
-      return out;
-    }
-
-    // スロット描画
-    function renderSlots(reservations, dateStr) {
-      slotsEl.innerHTML = '';
-      if (!dateStr) return;
-
-      const now = new Date();
-      const todayStr = now.toISOString().slice(0,10);
-
-      const bookedSet = new Set(reservations.map(r => r.time));
-
-      generateTimes().forEach(slot => {
-        const btn = document.createElement('div');
-        btn.className = 'slot';
-        btn.innerText = slot;
-
-        // 過去時間は非表示
-        if (dateStr === todayStr) {
-          const [hh, mm] = slot.split(':').map(Number);
-          const slotTime = new Date(dateStr + "T" + hh.toString().padStart(2,"0") + ":" + mm.toString().padStart(2,"0"));
-          if (slotTime <= now) return;
-        }
-
-        // 予約済みは黒ボタン
-        if (bookedSet.has(slot)) {
-          btn.classList.add('booked');
-        } else {
-          btn.onclick = () => {
-            selectedSlot = slot;
-            renderSlots(reservations, dateStr);
-            updateButton();
-          };
-        }
-        if (slot === selectedSlot) btn.classList.add('selected');
-        slotsEl.appendChild(btn);
-      });
-    }
-
-    function updateButton() {
-      reserveBtn.disabled = !(nameEl.value && selectedDate && selectedSlot);
-    }
-
-    nameEl.addEventListener('input', updateButton);
-
-    reserveBtn.onclick = () => {
-      const form = new URLSearchParams();
-      form.append('name', nameEl.value.trim());
-      form.append('date', selectedDate);
-      form.append('time', selectedSlot);
-
-      fetch(GAS_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-        body: form.toString()
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          messageEl.innerText = `${selectedDate} ${selectedSlot} を予約しました！`;
-          selectedSlot = null;
-          fetchReservations(selectedDate);
-          updateButton();
-        } else {
-          messageEl.innerText = data.message || "予約に失敗しました";
-        }
-      })
-      .catch(err => {
-        console.error("POST error:", err);
-        messageEl.innerText = "通信エラーが発生しました";
-      });
+// 日付を14日分生成（2列表示）
+function renderDates() {
+  const today = new Date();
+  for (let i=0;i<14;i++){
+    const d = new Date(today);
+    d.setDate(today.getDate()+i);
+    const dateStr = d.toISOString().slice(0,10);
+    const btn = document.createElement('div');
+    btn.className = 'date-btn';
+    btn.innerText = dateStr;
+    btn.onclick = () => {
+      selectedDate = dateStr;
+      selectedSlot = null;
+      renderDatesSelected();
+      fetchReservations(dateStr);
+      updateButton();
     };
+    datesEl.appendChild(btn);
+  }
+}
 
-    // 初期化
-    renderDates();
-  </script>
+function renderDatesSelected() {
+  [...datesEl.children].forEach(btn=>{
+    btn.classList.toggle('selected', btn.innerText===selectedDate);
+  });
+}
+
+// サーバーから予約状況取得
+function fetchReservations(dateStr){
+  fetch(GAS_URL + "?date=" + encodeURIComponent(dateStr))
+  .then(res=>res.json())
+  .then(data=>{ renderSlots(data,dateStr); })
+  .catch(err=>{
+    console.error("GET error:",err);
+    messageEl.innerText="サーバー接続エラー";
+  });
+}
+
+// 時間枠 09:00〜17:00 30分刻み固定
+function generateTimes(){
+  const out=[];
+  let start=9*60,end=17*60,step=30;
+  for(let cur=start;cur<=end;cur+=step){
+    const hh=String(Math.floor(cur/60)).padStart(2,'0');
+    const mm=String(cur%60).padStart(2,'0');
+    out.push(`${hh}:${mm}`);
+  }
+  return out;
+}
+
+// スロット描画
+function renderSlots(reservations,dateStr){
+  slotsEl.innerHTML='';
+  if(!dateStr)return;
+  const now=new Date();
+  const todayStr=now.toISOString().slice(0,10);
+  const bookedSet=new Set(reservations.map(r=>r.time));
+
+  generateTimes().forEach(slot=>{
+    const btn=document.createElement('div');
+    btn.className='slot';
+    btn.innerText=slot;
+
+    if(dateStr===todayStr){
+      const [hh,mm]=slot.split(':').map(Number);
+      const slotTime=new Date(dateStr+'T'+hh.toString().padStart(2,'0')+':'+mm.toString().padStart(2,'0'));
+      if(slotTime<=now)return;
+    }
+
+    if(bookedSet.has(slot)){
+      btn.classList.add('booked');
+    }else{
+      btn.onclick=()=>{
+        selectedSlot=slot;
+        renderSlots(reservations,dateStr);
+        updateButton();
+      };
+    }
+    if(slot===selectedSlot)btn.classList.add('selected');
+    slotsEl.appendChild(btn);
+  });
+}
+
+function updateButton(){
+  reserveBtn.disabled=!(nameEl.value && selectedDate && selectedSlot);
+}
+
+nameEl.addEventListener('input',updateButton);
+
+reserveBtn.onclick=()=>{
+  const form=new URLSearchParams();
+  form.append('name',nameEl.value.trim());
+  form.append('date',selectedDate);
+  form.append('time',selectedSlot);
+
+  fetch(GAS_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+    body:form.toString()
+  })
+  .then(res=>res.json())
+  .then(data=>{
+    if(data.success){
+      messageEl.innerText=`${selectedDate} ${selectedSlot} を予約しました！`;
+      selectedSlot=null;
+      fetchReservations(selectedDate);
+      updateButton();
+    }else{
+      messageEl.innerText=data.message||"予約に失敗しました";
+    }
+  })
+  .catch(err=>{
+    console.error("POST error:",err);
+    messageEl.innerText="通信エラーが発生しました";
+  });
+};
+
+// 初期化
+renderDates();
+</script>
 </body>
 </html>
