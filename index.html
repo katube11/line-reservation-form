@@ -71,8 +71,11 @@
     <div id="message"></div>
   </div>
 
+  <!-- LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script>
-    const GAS_URL = "★あなたのGASのデプロイURL★";
+    const GAS_URL = "https://script.google.com/a/macros/ict.shimanet.ed.jp/s/AKfycbzcM5c3kK14nycHdlHkvF2qF6tT2BCk35SQJctea-4DDzs_9vAf6XVMdcYGyRO7-C-UZQ/exec";
+    const LIFF_ID = "2008012264-GAaEPJdZ"; // LINE Developersで発行したLIFF ID
 
     const datesEl = document.getElementById('dates');
     const slotsEl = document.getElementById('slots');
@@ -82,6 +85,25 @@
 
     let selectedDate = null;
     let selectedSlot = null;
+
+    // LIFF初期化
+    window.addEventListener('load', async () => {
+      try {
+        await liff.init({ liffId: LIFF_ID });
+        console.log("LIFF initialized");
+
+        if (!liff.isLoggedIn()) {
+          liff.login();
+        } else {
+          const profile = await liff.getProfile();
+          nameEl.value = profile.displayName;
+          updateButton();
+        }
+      } catch (e) {
+        console.warn("LIFF init failed:", e);
+      }
+      renderDates();
+    });
 
     // 日付を14日分生成
     function renderDates() {
@@ -123,18 +145,16 @@
         });
     }
 
-    // 時間枠生成（09:00〜18:00を30分刻み）
-    function generateTimes(start, end, step){
+    // 時間枠生成（09:00〜17:00を30分刻み固定）
+    function generateTimes() {
       const out = [];
-      let [sh, sm] = start.split(':').map(Number);
-      let [eh, em] = end.split(':').map(Number);
-      let curMin = sh*60 + sm;
-      const endMin = eh*60 + em;
-      while(curMin <= endMin){
-        const hh = String(Math.floor(curMin/60)).padStart(2,'0');
-        const mm = String(curMin % 60).padStart(2,'0');
+      let start = 9 * 60;
+      let end = 17 * 60;
+      let step = 30;
+      for (let cur = start; cur <= end; cur += step) {
+        const hh = String(Math.floor(cur / 60)).padStart(2,'0');
+        const mm = String(cur % 60).padStart(2,'0');
         out.push(`${hh}:${mm}`);
-        curMin += step;
       }
       return out;
     }
@@ -149,7 +169,7 @@
 
       const bookedSet = new Set(reservations.map(r => r.time));
 
-      generateTimes("09:00","18:00",30).forEach(slot => {
+      generateTimes().forEach(slot => {
         const btn = document.createElement('div');
         btn.className = 'slot';
         btn.innerText = slot;
@@ -209,9 +229,6 @@
         messageEl.innerText = "通信エラーが発生しました";
       });
     };
-
-    // 初期化
-    renderDates();
   </script>
 </body>
 </html>
