@@ -13,7 +13,6 @@
       display: flex;
       justify-content: center;
     }
-
     .container {
       background: #fff;
       border-radius: 12px;
@@ -22,122 +21,38 @@
       max-width: 500px;
       width: 100%;
     }
-
-    h2 {
-      font-size: 28px;
-      margin-top: 0;
-      color: #333;
-    }
-
-    h3 {
-      font-size: 20px;
-      margin-top: 16px;
-      color: #333;
-    }
-
-    label {
-      display: block;
-      margin-top: 12px;
-      font-weight: 500;
-      font-size: 18px;
-    }
-
+    h2 { font-size: 28px; margin-top: 0; color: #333; }
+    h3 { font-size: 20px; margin-top: 16px; color: #333; }
+    label { display: block; margin-top: 12px; font-weight: 500; font-size: 18px; }
     input[type="text"] {
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      margin-top: 6px;
-      font-size: 18px;
+      width: 100%; padding: 14px; border-radius: 10px;
+      border: 1px solid #ccc; margin-top: 6px; font-size: 18px;
     }
-
     .scroll-container {
-      display: flex;
-      overflow-x: auto;
-      padding-bottom: 10px;
-      margin-bottom: 16px;
+      display: flex; overflow-x: auto; padding-bottom: 10px; margin-bottom: 16px;
     }
-
     .date-btn, .slot {
-      flex: 0 0 auto;
-      margin: 6px;
-      padding: 14px 20px;
-      border-radius: 12px;
-      border: 1px solid #ccc;
-      cursor: pointer;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-      transition: all 0.2s;
-      min-width: 120px;
-      height: 50px;
-      font-size: 18px;
-      text-align: center;
-      white-space: nowrap;
+      flex: 0 0 auto; margin: 6px; padding: 14px 20px;
+      border-radius: 12px; border: 1px solid #ccc;
+      cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+      transition: all 0.2s; min-width: 120px; height: 50px;
+      font-size: 18px; text-align: center; white-space: nowrap;
     }
-
-    .date-btn:hover:not(.selected), .slot:hover:not(.selected) {
-      background: #e0f7fa;
-    }
-
     .date-btn.selected, .slot.selected {
-      background: #0288d1;
-      color: #fff;
+      background: #0288d1; color: #fff;
       box-shadow: 0 5px 15px rgba(0,136,209,0.3);
     }
-
     .slot.booked {
-      background: #eee;
-      color: #aaa;
+      background: #000; color: #fff;
       cursor: not-allowed;
-      text-decoration: line-through;
     }
-
     .primary {
-      display: block;
-      width: 100%;
-      padding: 16px;
-      border-radius: 12px;
-      border: 0;
-      background: #06c755;
-      color: #fff;
-      margin-top: 24px;
-      font-size: 20px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
+      display: block; width: 100%; padding: 16px;
+      border-radius: 12px; border: 0; background: #06c755; color: #fff;
+      margin-top: 24px; font-size: 20px; font-weight: bold; cursor: pointer;
     }
-
-    .primary:disabled {
-      background: #aaa;
-      cursor: not-allowed;
-    }
-
-    .primary:hover:not(:disabled) {
-      background: #05a646;
-    }
-
-    #message {
-      margin-top: 14px;
-      color: #d00;
-      font-weight: 500;
-      font-size: 16px;
-    }
-
-    /* レスポンシブ：画面が小さい場合はさらに大きく */
-    @media screen and (max-width: 400px) {
-      .date-btn, .slot {
-        min-width: 140px;
-        height: 56px;
-        font-size: 20px;
-      }
-      input[type="text"] {
-        font-size: 20px;
-        padding: 16px;
-      }
-      .primary {
-        font-size: 22px;
-        padding: 18px;
-      }
-    }
+    .primary:disabled { background: #aaa; cursor: not-allowed; }
+    #message { margin-top: 14px; color: #d00; font-weight: 500; font-size: 16px; }
   </style>
 </head>
 <body>
@@ -157,6 +72,8 @@
   </div>
 
   <script>
+    const GAS_URL = "★あなたのGASのデプロイURL★";
+
     const datesEl = document.getElementById('dates');
     const slotsEl = document.getElementById('slots');
     const reserveBtn = document.getElementById('reserveBtn');
@@ -166,49 +83,91 @@
     let selectedDate = null;
     let selectedSlot = null;
 
-    // サンプルデータ
-    const dates = ["10/1", "10/2", "10/3"];
-    const slots = {
-      "10/1": ["10:00", "11:00", "14:00"],
-      "10/2": ["9:00", "13:00", "15:00"],
-      "10/3": ["12:00", "16:00"]
-    };
-    let booked = { "10/1": ["11:00"], "10/2": [], "10/3": ["16:00"] };
-
-    // 日付ボタン生成
-    dates.forEach(date => {
-      const btn = document.createElement('div');
-      btn.className = 'date-btn';
-      btn.innerText = date;
-      btn.onclick = () => {
-        selectedDate = date;
-        selectedSlot = null;
-        renderDates();
-        renderSlots();
-        updateButton();
-      };
-      datesEl.appendChild(btn);
-    });
-
+    // 日付を14日分生成
     function renderDates() {
+      const today = new Date();
+      for (let i=0; i<14; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
+        const dateStr = d.toISOString().slice(0,10);
+        const btn = document.createElement('div');
+        btn.className = 'date-btn';
+        btn.innerText = dateStr;
+        btn.onclick = () => {
+          selectedDate = dateStr;
+          selectedSlot = null;
+          renderDatesSelected();
+          fetchReservations(dateStr);
+          updateButton();
+        };
+        datesEl.appendChild(btn);
+      }
+    }
+
+    function renderDatesSelected() {
       [...datesEl.children].forEach(btn => {
         btn.classList.toggle('selected', btn.innerText === selectedDate);
       });
     }
 
-    function renderSlots() {
+    // サーバーから予約状況を取得
+    function fetchReservations(dateStr) {
+      fetch(GAS_URL + "?date=" + encodeURIComponent(dateStr))
+        .then(res => res.json())
+        .then(data => {
+          renderSlots(data, dateStr);
+        })
+        .catch(err => {
+          console.error("GET error:", err);
+          messageEl.innerText = "サーバー接続エラー";
+        });
+    }
+
+    // 時間枠生成（09:00〜18:00を30分刻み）
+    function generateTimes(start, end, step){
+      const out = [];
+      let [sh, sm] = start.split(':').map(Number);
+      let [eh, em] = end.split(':').map(Number);
+      let curMin = sh*60 + sm;
+      const endMin = eh*60 + em;
+      while(curMin <= endMin){
+        const hh = String(Math.floor(curMin/60)).padStart(2,'0');
+        const mm = String(curMin % 60).padStart(2,'0');
+        out.push(`${hh}:${mm}`);
+        curMin += step;
+      }
+      return out;
+    }
+
+    // スロット描画
+    function renderSlots(reservations, dateStr) {
       slotsEl.innerHTML = '';
-      if (!selectedDate) return;
-      slots[selectedDate].forEach(slot => {
+      if (!dateStr) return;
+
+      const now = new Date();
+      const todayStr = now.toISOString().slice(0,10);
+
+      const bookedSet = new Set(reservations.map(r => r.time));
+
+      generateTimes("09:00","18:00",30).forEach(slot => {
         const btn = document.createElement('div');
         btn.className = 'slot';
         btn.innerText = slot;
-        if (booked[selectedDate].includes(slot)) {
+
+        // 過去時間は非表示
+        if (dateStr === todayStr) {
+          const [hh, mm] = slot.split(':').map(Number);
+          const slotTime = new Date(dateStr + "T" + hh.toString().padStart(2,"0") + ":" + mm.toString().padStart(2,"0"));
+          if (slotTime <= now) return;
+        }
+
+        // 予約済みは黒ボタン
+        if (bookedSet.has(slot)) {
           btn.classList.add('booked');
         } else {
           btn.onclick = () => {
             selectedSlot = slot;
-            renderSlots();
+            renderSlots(reservations, dateStr);
             updateButton();
           };
         }
@@ -224,16 +183,35 @@
     nameEl.addEventListener('input', updateButton);
 
     reserveBtn.onclick = () => {
-      if (booked[selectedDate].includes(selectedSlot)) {
-        messageEl.innerText = "すでに予約されています。";
-        return;
-      }
-      booked[selectedDate].push(selectedSlot);
-      messageEl.innerText = `${selectedDate} ${selectedSlot} を予約しました！`;
-      selectedSlot = null;
-      renderSlots();
-      updateButton();
+      const form = new URLSearchParams();
+      form.append('name', nameEl.value.trim());
+      form.append('date', selectedDate);
+      form.append('time', selectedSlot);
+
+      fetch(GAS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: form.toString()
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          messageEl.innerText = `${selectedDate} ${selectedSlot} を予約しました！`;
+          selectedSlot = null;
+          fetchReservations(selectedDate);
+          updateButton();
+        } else {
+          messageEl.innerText = data.message || "予約に失敗しました";
+        }
+      })
+      .catch(err => {
+        console.error("POST error:", err);
+        messageEl.innerText = "通信エラーが発生しました";
+      });
     };
+
+    // 初期化
+    renderDates();
   </script>
 </body>
 </html>
