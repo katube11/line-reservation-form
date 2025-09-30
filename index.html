@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>予約フォーム</title>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <style>
     body {
       font-family: 'Noto Sans JP', sans-serif;
@@ -13,6 +13,7 @@
       display: flex;
       justify-content: center;
     }
+
     .container {
       background: #fff;
       border-radius: 12px;
@@ -21,89 +22,121 @@
       max-width: 500px;
       width: 100%;
     }
-    h2, h3 {
+
+    h2 {
+      font-size: 28px;
       margin-top: 0;
       color: #333;
     }
+
+    h3 {
+      font-size: 20px;
+      margin-top: 16px;
+      color: #333;
+    }
+
     label {
       display: block;
       margin-top: 12px;
       font-weight: 500;
+      font-size: 18px;
     }
+
     input[type="text"] {
       width: 100%;
-      padding: 10px;
-      border-radius: 8px;
+      padding: 14px;
+      border-radius: 10px;
       border: 1px solid #ccc;
-      margin-top: 4px;
-      font-size: 16px;
+      margin-top: 6px;
+      font-size: 18px;
     }
-    /* 横スクロールコンテナ */
+
     .scroll-container {
       display: flex;
       overflow-x: auto;
-      padding-bottom: 8px;
-      margin-bottom: 12px;
+      padding-bottom: 10px;
+      margin-bottom: 16px;
     }
-    .scroll-container::-webkit-scrollbar {
-      height: 6px;
-    }
-    .scroll-container::-webkit-scrollbar-thumb {
-      background: rgba(0,0,0,0.2);
-      border-radius: 3px;
-    }
+
     .date-btn, .slot {
       flex: 0 0 auto;
       margin: 6px;
-      padding: 12px 16px;
-      border-radius: 10px;
+      padding: 14px 20px;
+      border-radius: 12px;
       border: 1px solid #ccc;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
       transition: all 0.2s;
-      min-width: 100px;
+      min-width: 120px;
+      height: 50px;
+      font-size: 18px;
       text-align: center;
       white-space: nowrap;
     }
+
     .date-btn:hover:not(.selected), .slot:hover:not(.selected) {
       background: #e0f7fa;
     }
+
     .date-btn.selected, .slot.selected {
       background: #0288d1;
       color: #fff;
-      box-shadow: 0 4px 12px rgba(0,136,209,0.3);
+      box-shadow: 0 5px 15px rgba(0,136,209,0.3);
     }
+
     .slot.booked {
       background: #eee;
       color: #aaa;
       cursor: not-allowed;
       text-decoration: line-through;
     }
+
     .primary {
       display: block;
       width: 100%;
-      padding: 14px;
-      border-radius: 10px;
+      padding: 16px;
+      border-radius: 12px;
       border: 0;
       background: #06c755;
       color: #fff;
-      margin-top: 20px;
-      font-size: 18px;
+      margin-top: 24px;
+      font-size: 20px;
       font-weight: bold;
       cursor: pointer;
       transition: background 0.2s;
     }
+
     .primary:disabled {
       background: #aaa;
       cursor: not-allowed;
     }
+
     .primary:hover:not(:disabled) {
       background: #05a646;
     }
+
     #message {
-      margin-top: 12px;
+      margin-top: 14px;
       color: #d00;
       font-weight: 500;
+      font-size: 16px;
+    }
+
+    /* レスポンシブ：画面が小さい場合はさらに大きく */
+    @media screen and (max-width: 400px) {
+      .date-btn, .slot {
+        min-width: 140px;
+        height: 56px;
+        font-size: 20px;
+      }
+      input[type="text"] {
+        font-size: 20px;
+        padding: 16px;
+      }
+      .primary {
+        font-size: 22px;
+        padding: 18px;
+      }
     }
   </style>
 </head>
@@ -124,144 +157,83 @@
   </div>
 
   <script>
-    (() => {
-      const GAS_URL = "https://script.google.com/macros/s/AKfycbwV9E-5f4lQ6fFxsCDKe2cm_QmwPa6UVd6G3AdPpI59_9rIx9b9S9ACU4Iet-dwaSDmcw/exec";
-      const LIFF_ID = "2008012264-GAaEPJdZ";
+    const datesEl = document.getElementById('dates');
+    const slotsEl = document.getElementById('slots');
+    const reserveBtn = document.getElementById('reserveBtn');
+    const messageEl = document.getElementById('message');
+    const nameEl = document.getElementById('name');
 
-      let selectedDate = "";
-      let selectedTime = "";
+    let selectedDate = null;
+    let selectedSlot = null;
 
-      window.addEventListener('load', async () => {
-        try { if(window.liff && LIFF_ID) await liff.init({ liffId: LIFF_ID }); } 
-        catch(e){ console.warn("LIFF init failed:", e); }
+    // サンプルデータ
+    const dates = ["10/1", "10/2", "10/3"];
+    const slots = {
+      "10/1": ["10:00", "11:00", "14:00"],
+      "10/2": ["9:00", "13:00", "15:00"],
+      "10/3": ["12:00", "16:00"]
+    };
+    let booked = { "10/1": ["11:00"], "10/2": [], "10/3": ["16:00"] };
+
+    // 日付ボタン生成
+    dates.forEach(date => {
+      const btn = document.createElement('div');
+      btn.className = 'date-btn';
+      btn.innerText = date;
+      btn.onclick = () => {
+        selectedDate = date;
+        selectedSlot = null;
         renderDates();
-      });
+        renderSlots();
+        updateButton();
+      };
+      datesEl.appendChild(btn);
+    });
 
-      function renderDates() {
-        const container = document.getElementById('dates');
-        container.innerHTML = '';
-        const today = new Date();
-        for (let i=0;i<14;i++){
-          const d = new Date(today);
-          d.setDate(today.getDate()+i);
-          const dateStr = d.toISOString().slice(0,10);
-          const btn = document.createElement('button');
-          btn.type='button';
-          btn.className='date-btn';
-          btn.textContent=dateStr;
-          btn.addEventListener('click',()=>onDateClick(dateStr,btn));
-          container.appendChild(btn);
+    function renderDates() {
+      [...datesEl.children].forEach(btn => {
+        btn.classList.toggle('selected', btn.innerText === selectedDate);
+      });
+    }
+
+    function renderSlots() {
+      slotsEl.innerHTML = '';
+      if (!selectedDate) return;
+      slots[selectedDate].forEach(slot => {
+        const btn = document.createElement('div');
+        btn.className = 'slot';
+        btn.innerText = slot;
+        if (booked[selectedDate].includes(slot)) {
+          btn.classList.add('booked');
+        } else {
+          btn.onclick = () => {
+            selectedSlot = slot;
+            renderSlots();
+            updateButton();
+          };
         }
-      }
-
-      function onDateClick(dateStr, btn) {
-        document.querySelectorAll('.date-btn').forEach(b=>b.classList.remove('selected'));
-        btn.classList.add('selected');
-        selectedDate=dateStr;
-        selectedTime="";
-        document.getElementById('reserveBtn').disabled=true;
-        renderSlots([], dateStr);
-        fetch(GAS_URL+"?date="+encodeURIComponent(dateStr))
-          .then(r=>r.json())
-          .then(data=>renderSlots(data,dateStr))
-          .catch(err=>{
-            console.error(err);
-            renderSlots([], dateStr);
-            document.getElementById('message').textContent="サーバー接続エラー（予約状況が読み取れません）";
-          });
-      }
-
-      function renderSlots(reservations, dateStr){
-        const container=document.getElementById('slots');
-        container.innerHTML='';
-        const times=generateTimes("09:00","18:00",30);
-        const booked=new Set();
-        (reservations||[]).forEach(r=>{
-          if(!r||!r.time) return;
-          const m=String(r.time).match(/(\d{1,2}):(\d{2})/);
-          if(m) booked.add(String(m[1]).padStart(2,'0')+":"+m[2]);
-          else booked.add(r.time);
-        });
-        times.forEach(t=>{
-          const btn=document.createElement('button');
-          btn.type='button';
-          btn.className='slot';
-          btn.textContent=t;
-          if(booked.has(t)){
-            btn.classList.add('booked');
-            btn.textContent=t+"（先着がいます）";
-            btn.disabled=true;
-          } else {
-            btn.addEventListener('click',()=>{
-              document.querySelectorAll('.slot').forEach(s=>s.classList.remove('selected'));
-              btn.classList.add('selected');
-              selectedTime=t;
-              if(document.getElementById('name').value.trim()){
-                document.getElementById('reserveBtn').disabled=false;
-                document.getElementById('message').textContent="";
-              }
-            });
-          }
-          container.appendChild(btn);
-        });
-      }
-
-      function generateTimes(start,end,step){
-        const out=[];
-        let [sh,sm]=start.split(':').map(Number);
-        let [eh,em]=end.split(':').map(Number);
-        let curMin=sh*60+sm;
-        const endMin=eh*60+em;
-        while(curMin<=endMin){
-          const hh=String(Math.floor(curMin/60)).padStart(2,'0');
-          const mm=String(curMin%60).padStart(2,'0');
-          out.push(`${hh}:${mm}`);
-          curMin+=step;
-        }
-        return out;
-      }
-
-      document.getElementById('reserveBtn').addEventListener('click',function(e){
-        e.preventDefault();
-        const name=document.getElementById('name').value.trim();
-        if(!name){ alert('名前を入力してください'); return; }
-        if(!selectedDate||!selectedTime){ alert('日付・時間を選んでください'); return; }
-
-        const form=new URLSearchParams();
-        form.append('name',name);
-        form.append('date',selectedDate);
-        form.append('time',selectedTime);
-
-        fetch(GAS_URL,{
-          method:'POST',
-          headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
-          body: form.toString()
-        }).then(async res=>{
-          const text=await res.text();
-          try{
-            const data=JSON.parse(text);
-            if(data.success){
-              alert('予約が完了しました！');
-              onDateClick(selectedDate, document.querySelector('.date-btn.selected'));
-            } else {
-              alert(data.message||'予約に失敗しました');
-            }
-          }catch(err){
-            console.error(err);
-            alert('サーバー応答が不正です');
-          }
-        }).catch(err=>{
-          console.error(err);
-          alert('通信エラーが発生しました');
-        });
+        if (slot === selectedSlot) btn.classList.add('selected');
+        slotsEl.appendChild(btn);
       });
+    }
 
-      document.getElementById('name').addEventListener('input',()=>{
-        const btn=document.getElementById('reserveBtn');
-        btn.disabled=!(document.getElementById('name').value.trim() && selectedDate && selectedTime);
-      });
+    function updateButton() {
+      reserveBtn.disabled = !(nameEl.value && selectedDate && selectedSlot);
+    }
 
-    })();
+    nameEl.addEventListener('input', updateButton);
+
+    reserveBtn.onclick = () => {
+      if (booked[selectedDate].includes(selectedSlot)) {
+        messageEl.innerText = "すでに予約されています。";
+        return;
+      }
+      booked[selectedDate].push(selectedSlot);
+      messageEl.innerText = `${selectedDate} ${selectedSlot} を予約しました！`;
+      selectedSlot = null;
+      renderSlots();
+      updateButton();
+    };
   </script>
 </body>
 </html>
