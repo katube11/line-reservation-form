@@ -21,8 +21,6 @@
             --success-color: #28a745;
             --error-color: #dc3545;
         }
-
-        /* --- 基本レイアウトと装飾 --- */
         * { box-sizing: border-box; }
         body {
             font-family: 'Noto Sans JP', 'Inter', sans-serif;
@@ -44,9 +42,6 @@
             box-shadow: inset 0 1px 4px rgba(0,0,0,0.08); transition: border-color 0.3s;
         }
         input[type="text"]:focus { border-color: var(--secondary-color); box-shadow: 0 0 0 4px rgba(0, 177, 173, 0.25); outline: none; }
-        input[type="text"][readonly] { background-color: #f7f7f7; cursor: default; }
-
-        /* --- 日付・時間スロット --- */
         #dates, #slots { display: grid; gap: 15px; margin-top: 15px; }
         #dates { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
         #slots { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
@@ -62,8 +57,6 @@
         .date-btn.selected .day-of-week { color: rgba(255, 255, 255, 0.8); }
         .slot.booked { background: #e9ecef; color: #999999; cursor: not-allowed; border-color: #d0d0d0; opacity: 0.8; }
         .slot.booked::after { content: '予約済'; position: absolute; bottom: 5px; right: 5px; font-size: 0.7em; font-weight: 600; color: #777; }
-
-        /* --- ボタンとメッセージ --- */
         .primary {
             display: block; width: 100%; padding: 18px 20px; border-radius: 14px; border: none; background: var(--accent-color);
             color: #fff; margin-top: 40px; font-size: 24px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 25px rgba(255, 112, 67, 0.4);
@@ -73,8 +66,6 @@
         .primary:disabled { background: #bdbdbd; cursor: not-allowed; opacity: 0.7; }
         #message { margin-top: 25px; font-size: 18px; font-weight: 600; text-align: center; color: var(--error-color); }
         #message.error::before { content: '❌ '; font-size: 1.2em; margin-right: 5px; color: var(--error-color); }
-
-        /* --- モーダル スタイル --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6);
             display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px);
@@ -131,10 +122,10 @@
 // ======================================================
 // ★ 以下の2つの定数を、ご自身の環境に合わせて変更してください ★
 // ======================================================
-// あなたが設定したLIFF IDを使用
+// ⚠️ このLIFF IDは仮の値です。ご自身のLIFF IDに置き換えてください。
 const LIFF_ID = "2008012264-GAaEPJdZ"; 
-// あなたがデプロイした最新のGAS URLを使用
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyXtpX--7wIFbnXZ9K7PHmeacrzGs5FGtmikUxgbUex9gbCVl2qBSOfO9Kd01md8SjE/exec";
+// ⚠️ このGAS URLは仮の値です。ご自身のデプロイURLに置き換えてください。
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyGBO91u_zlEQLGxOn5B2S-npJscxFcrgMSfbzA5vP1b6rYd9hLZNPJ8CaPh-ca-fys/exec";
 // ======================================================
 
 const datesEl = document.getElementById('dates');
@@ -191,9 +182,10 @@ function initializeLiff() {
                 nameEl.value = profile.displayName;
                 nameEl.placeholder = "（LINE名が自動入力されています）";
                 messageEl.innerText = "LINE情報が自動入力されました。";
+                messageEl.className = '';
+                setTimeout(() => { messageEl.innerText = ''; }, 3000);
             } else {
                  nameEl.placeholder = "お名前を入力してください";
-                 messageEl.innerText = "";
             }
         })
         .catch((err) => {
@@ -201,11 +193,12 @@ function initializeLiff() {
             console.warn('LIFF Initialization failed (Proceeding anyway)', err);
             liffUser.userId = null;
             nameEl.placeholder = "お名前を入力してください";
-            messageEl.innerText = "LINE連携に失敗しました。";
+            messageEl.innerText = "LINE連携に失敗しました。予約は手動入力で可能です。";
             messageEl.className = 'error';
         })
         .finally(() => {
             // 成功/失敗にかかわらず、最後にフォームの初期化処理を呼び出す
+            // ★この処理により、LIFFが失敗しても日付が表示されます★
             runFormInitialization();
         });
 }
@@ -217,7 +210,6 @@ function runFormInitialization() {
     renderDates(); 
     renderSlots([], null); 
     updateButton(); 
-    // 名前入力欄は常に手動入力可能
     nameEl.addEventListener('input', updateButton);
 }
 
@@ -267,7 +259,6 @@ function fetchReservations(dateStr){
     messageEl.innerText = '予約状況を取得中...';
     messageEl.className = '';
     slotsEl.innerHTML = '';
-    // ★ 予約状況取得のためのGAS通信 ★
     fetch(GAS_URL + "?date=" + encodeURIComponent(dateStr))
     .then(res=>{
         if (!res.ok) throw new Error('Network response was not ok.');
@@ -309,6 +300,7 @@ function renderSlots(reservations,dateStr){
     const todayStr = now.toISOString().slice(0, 10);
     const bookedSet = new Set(reservations.map(r=>r.time));
     
+    // 予約可能な下限時刻 (現在時刻 + 1時間) を計算
     const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000); 
     const thresholdHour = oneHourLater.getHours();
     const thresholdMinute = oneHourLater.getMinutes();
@@ -358,6 +350,7 @@ function renderSlots(reservations,dateStr){
 
 // 予約ボタンの有効化判定
 function updateButton(){
+    // 名前が入力されていればOK
     const reservationName = nameEl.value.trim();
     
     reserveBtn.disabled=!(reservationName && selectedDate && selectedSlot);
