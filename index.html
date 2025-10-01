@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>予約フォーム</title>
+  <title>LIFF予約フォーム</title>
+  <script src="https://static.line-scdn.net/liff/2.22.4/sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
+    /* CSSスタイルは以前のバージョンと同一です */
     :root {
       --primary-color: #007B8C; /* 深い青緑 */
       --secondary-color: #00B1AD; /* 明るい青緑 */
@@ -47,6 +49,10 @@
       box-shadow: inset 0 1px 4px rgba(0,0,0,0.08); transition: border-color 0.3s;
     }
     input[type="text"]:focus { border-color: var(--secondary-color); box-shadow: 0 0 0 4px rgba(0, 177, 173, 0.25); outline: none; }
+    input[type="text"][readonly] {
+        background-color: #f7f7f7; /* 読み取り専用は背景色を変える */
+        cursor: default;
+    }
 
     /* --- 日付・時間スロット --- */
     #dates, #slots { display: grid; gap: 15px; margin-top: 15px; }
@@ -107,7 +113,7 @@
 <div class="container">
   <h2><span>📅</span> 予約フォーム</h2>
   <label for="name">お名前</label>
-  <input id="name" type="text" placeholder="例: 山田太郎" autocomplete="name" />
+  <input id="name" type="text" placeholder="LINE名が自動入力されます" autocomplete="name" />
 
   <h3>日付を選択してください</h3>
   <div id="dates"></div>
@@ -131,8 +137,9 @@
 
 <script>
 // ======================================================
-// ★ ここにご自身の Google Apps Script のデプロイURLを設定してください ★
+// ★ 以下の2つの定数を、ご自身の環境に合わせて変更してください ★
 // ======================================================
+const LIFF_ID = "2008012264-GAaEPJdZ"; 
 const GAS_URL = "https://script.google.com/macros/s/AKfycbxhBM8S2NPnZbUUacJE6QzC2URfuMXY6PWXN6ZrOlaqC47MRUbMEbB89iVSiIotJUqL/exec";
 // ======================================================
 
@@ -150,6 +157,12 @@ const modalCloseBtn = document.getElementById('modalCloseBtn');
 let selectedDate = null;
 let selectedSlot = null;
 
+// LIFFで取得するユーザー情報用の変数
+let liffUser = {
+  userId: null,
+  displayName: null
+};
+
 
 // --- モーダル制御 ---
 modalCloseBtn.onclick = () => {
@@ -162,7 +175,66 @@ modal.onclick = (e) => {
 };
 
 
-// --- フォーム初期化・描画ロジック ---
+// --- LIFF初期化ロジック ---
+
+/** * LIFF初期化とユーザー情報取得
+ * 処理の成功/失敗にかかわらず、フォームの初期化 (runFormInitialization) を呼び出す
+ */
+function initializeLiff() {
+    liff.init({ liffId: LIFF_ID })
+        .then(() => {
+            if (!liff.isLoggedIn()) {
+                // 未ログインの場合、ログイン画面にリダイレクト
+                liff.login();
+                return;
+            }
+            // ログイン済みの場合、プロフィール情報を取得
+            return liff.getProfile();
+        })
+        .then(profile => {
+            if (profile) {
+                liffUser.userId = profile.userId;
+                liffUser.displayName = profile.displayName;
+                
+                // 取得した名前をフォームに自動入力
+                nameEl.value = profile.displayName;
+                
+                // 名前フィールドを読み取り専用に設定し、ユーザーが変更できないようにする
+                nameEl.readOnly = true; 
+                nameEl.placeholder = "LINE名が自動入力されています";
+            }
+            // フォームの初期化処理を呼び出す (日付描画もここに含まれる)
+            runFormInitialization(); 
+        })
+        .catch((err) => {
+            console.error('LIFF Initialization failed', err);
+            
+            // LIFFが使えない場合も、手動入力でフォームを続行させる
+            liffUser.userId = null;
+            nameEl.placeholder = "お名前を入力してください";
+            nameEl.readOnly = false;
+            runFormInitialization();
+            
+            // LIFFエラーメッセージ表示
+            messageEl.innerText = "LINE連携に失敗しました。手動で名前を入力してください。";
+            messageEl.className = 'error';
+            setTimeout(() => { messageEl.innerText = ''; messageEl.className = ''; }, 5000);
+        });
+}
+
+/**
+ * フォームの初期化処理をまとめた関数 (日付描画はここ)
+ */
+function runFormInitialization() {
+    renderDates(); 
+    renderSlots([], null); 
+    updateButton(); 
+    // 名前が読み取り専用でない場合に備えてリスナーを再設定
+    nameEl.addEventListener('input', updateButton);
+}
+
+
+// --- フォーム初期化・描画ロジック (以前のバージョンと同一) ---
 
 // 日付を14日分生成
 function renderDates() {
@@ -236,7 +308,7 @@ function generateTimes(){
   return out;
 }
 
-// スロット描画
+// スロット描画 (1時間前制限を維持)
 function renderSlots(reservations,dateStr){
   slotsEl.innerHTML='';
   if(!dateStr){
@@ -249,7 +321,6 @@ function renderSlots(reservations,dateStr){
   const bookedSet = new Set(reservations.map(r=>r.time));
   
   // 予約可能な下限時刻 (現在時刻 + 1時間) を計算
-  // 60 * 60 * 1000 ミリ秒を足す
   const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000); 
   const thresholdHour = oneHourLater.getHours();
   const thresholdMinute = oneHourLater.getMinutes();
@@ -269,8 +340,7 @@ function renderSlots(reservations,dateStr){
       const [slotHour, slotMinute] = slot.split(':').map(Number);
       const slotMinutes = slotHour * 60 + slotMinute;
 
-      // ★ 1時間前の判定ロジック ★
-      // スロットの開始時刻が、現在時刻+1時間未満であれば無効とする
+      // 1時間前の判定ロジック: スロットの開始時刻が、現在時刻+1時間未満であれば無効
       if (slotMinutes < thresholdMinutes) {
         isPast = true;
       }
@@ -295,7 +365,6 @@ function renderSlots(reservations,dateStr){
   if (!hasAvailableSlots && bookedSet.size === generateTimes().length) {
     slotsEl.innerHTML = '<p style="text-align: center; color: var(--light-text-color);">この日はすべての時間帯が予約済みです。</p>';
   } else if (!hasAvailableSlots && dateStr === todayStr && thresholdHour >= 17) {
-      // 終業時刻(17時)と比較する際は、1時間後の閾値を用いる
       slotsEl.innerHTML = '<p style="text-align: center; color: var(--light-text-color);">本日の予約枠は終了しました。</p>';
   } else if (!hasAvailableSlots) {
       slotsEl.innerHTML = '<p style="text-align: center; color: var(--light-text-color);">予約可能な時間がありません。</p>';
@@ -304,7 +373,11 @@ function renderSlots(reservations,dateStr){
 
 // 予約ボタンの有効化判定
 function updateButton(){
-  reserveBtn.disabled=!(nameEl.value.trim() && selectedDate && selectedSlot);
+  // LIFFユーザーIDが取得できているか、または手動入力されているかを確認
+  const reservationName = nameEl.value.trim();
+  const isLiffReady = !!liffUser.userId || (!nameEl.readOnly && reservationName);
+  
+  reserveBtn.disabled=!(isLiffReady && reservationName && selectedDate && selectedSlot);
 }
 
 // --- イベントリスナー ---
@@ -314,12 +387,19 @@ reserveBtn.onclick=()=>{
   const reservationName = nameEl.value.trim();
   const reservationDate = selectedDate;
   const reservationTime = selectedSlot;
-    
+  const lineUserId = liffUser.userId; // LIFF IDをここで取得
+
   if (!reservationName || !reservationDate || !reservationTime) {
     messageEl.innerText = "名前、日付、時間を選択してください。";
     messageEl.className = 'error';
     return;
   }
+
+  // LIFF IDが取得できているか確認（必須ではないが、取得できていない場合は警告）
+  if (!lineUserId) {
+    console.warn("LIFF User ID is missing. Submitting without LINE ID.");
+  }
+
 
   messageEl.innerText = '予約を送信中...';
   messageEl.className = '';
@@ -329,6 +409,7 @@ reserveBtn.onclick=()=>{
   form.append('name',reservationName);
   form.append('date',reservationDate);
   form.append('time',reservationTime);
+  form.append('lineUserId', lineUserId || 'N/A'); // ★ LINE ID または N/A を送信 ★
 
   fetch(GAS_URL,{
     method:'POST',
@@ -345,7 +426,7 @@ reserveBtn.onclick=()=>{
       const formattedDate = reservationDate.replace(/-/g, '/');
       modalDetails.innerHTML = `
           <p>ご予約ありがとうございます、**${reservationName}**様。</p>
-          <p>予約内容をご確認ください。</p>
+          <p>予約内容をご確認ください。LINEの通知もご確認ください。</p>
           <strong>
               🗓 日時: ${formattedDate}<br>
               🕒 時間: ${reservationTime}
@@ -355,10 +436,13 @@ reserveBtn.onclick=()=>{
       modal.classList.add('active');
 
       // フォームをリセット
-      nameEl.value = '';
+      if(liffUser.displayName) {
+          nameEl.value = liffUser.displayName; // LINE名に戻す
+      } else {
+          nameEl.value = '';
+      }
       selectedSlot = null;
-      // 予約状況を再取得し、予約したスロットを「予約済」にする
-      fetchReservations(selectedDate); 
+      fetchReservations(selectedDate);
       updateButton();
 
     }else{
@@ -375,10 +459,8 @@ reserveBtn.onclick=()=>{
   });
 };
 
-// --- 初期化実行 ---
-renderDates();
-renderSlots([], null); 
-updateButton(); 
+// フォームの実行をLIFF初期化後に移す
+initializeLiff();
 </script>
 </body>
 </html>
