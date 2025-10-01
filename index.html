@@ -133,7 +133,7 @@
 let liffUserId = null;
 async function initializeLiff() {
     try {
-        await liff.init({ liffId: "2008012264-GAaEPJdZ" }); // ← ここにLIFF IDを入力
+        await liff.init({ liffId: "YOUR_LIFF_ID" }); // ← ここにLIFF IDを入力
         if (!liff.isLoggedIn()) {
             liff.login();
         } else {
@@ -152,7 +152,7 @@ async function initializeLiff() {
 initializeLiff();
 
 // ----------------- 既存予約コード -----------------
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwe2pdT4pblT9Q6V58an0awMjWT7oPqQ3RgFiqCugntQv8agAY1JxIfwTH3_RY7nL_q/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwECttjXZ8oZV2KWuvcZm0atWIVeSJCE_BEaguoEvkwj5m-Ht8K8nXBB5EICVfB0UZY/exec";
 const datesEl = document.getElementById('dates');
 const slotsEl = document.getElementById('slots');
 const reserveBtn = document.getElementById('reserveBtn');
