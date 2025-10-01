@@ -4,79 +4,246 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>予約フォーム</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #007B8C; /* 深い青緑 */
+      --primary-hover: #005F6B;
+      --secondary-color: #00B1AD; /* 明るい青緑 */
+      --background-color: #f8fbfd;
+      --card-background: #ffffff;
+      --text-color: #333333;
+      --light-text-color: #666666;
+      --border-color: #e0e0e0;
+      --shadow-light: 0 4px 15px rgba(0,0,0,0.08);
+      --shadow-medium: 0 8px 25px rgba(0,0,0,0.12);
+      --success-color: #28a745;
+      --error-color: #dc3545;
+    }
+
     * {
       box-sizing: border-box;
     }
     body {
-      font-family: 'Noto Sans JP', sans-serif;
-      background: #f4f6f8;
+      font-family: 'Noto Sans JP', 'Inter', sans-serif;
+      background: var(--background-color);
       margin: 0;
-      padding: 16px;
+      padding: 20px;
       display: flex;
       justify-content: center;
+      min-height: 100vh;
+      color: var(--text-color);
     }
     .container {
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      padding: 24px;
-      max-width: 500px;
+      background: var(--card-background);
+      border-radius: 16px;
+      box-shadow: var(--shadow-medium);
+      padding: 30px;
+      max-width: 550px;
       width: 100%;
+      position: relative;
     }
-    h2 { font-size: 26px; margin-top: 0; color: #333; }
-    h3 { font-size: 20px; margin-top: 20px; color: #333; }
-    label { display: block; margin-top: 12px; font-weight: 500; font-size: 18px; }
-    input[type="text"] {
-      width: 100%; 
-      padding: 14px; 
-      border-radius: 10px;
-      border: 1px solid #ccc; 
-      margin-top: 6px; 
+    h2 {
+      font-size: 28px;
+      margin-top: 0;
+      margin-bottom: 25px;
+      color: var(--primary-color);
+      font-weight: 700;
+      text-align: center;
+    }
+    h3 {
+      font-size: 22px;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      color: var(--primary-color);
+      font-weight: 600;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 500;
       font-size: 18px;
-      box-sizing: border-box;
+      color: var(--light-text-color);
     }
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      margin-top: 8px;
+      font-size: 18px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type="text"]:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(0, 123, 140, 0.2);
+      outline: none;
+    }
+
     /* 2列レイアウト */
     #dates {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-      margin-top: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* レスポンシブに対応 */
+      gap: 12px;
+      margin-top: 15px;
     }
     .date-btn, .slot {
-      display: block;
-      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
       border-radius: 12px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--border-color);
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      box-shadow: var(--shadow-light);
       text-align: center;
-      font-size: 16px;
-      transition: all 0.2s;
+      font-size: 17px;
+      font-weight: 500;
+      transition: all 0.2s ease-in-out;
+      background-color: var(--card-background);
+      color: var(--text-color);
+    }
+    .date-btn:hover:not(.selected), .slot:hover:not(.selected):not(.booked) {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-medium);
+      border-color: var(--primary-color);
     }
     .date-btn.selected, .slot.selected {
-      background: #0288d1; color: #fff;
-      box-shadow: 0 5px 12px rgba(0,136,209,0.3);
+      background: var(--primary-color);
+      color: #fff;
+      border-color: var(--primary-color);
+      box-shadow: 0 5px 15px rgba(0, 123, 140, 0.4);
+      transform: translateY(-1px);
     }
     .slot.booked {
-      background: #000; color: #fff;
+      background: #cccccc;
+      color: #777777;
       cursor: not-allowed;
+      border-color: #b0b0b0;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+      opacity: 0.7;
+      text-decoration: line-through;
     }
-    .slot { margin-top: 8px; }
+    .slot { margin-top: 0; } /* grid gapで調整 */
+
+    #slots {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* レスポンシブに対応 */
+      gap: 10px;
+      margin-top: 15px;
+    }
+
     .primary {
-      display: block; width: 100%; padding: 16px;
-      border-radius: 12px; border: 0; background: #06c755; color: #fff;
-      margin-top: 24px; font-size: 20px; font-weight: bold; cursor: pointer;
+      display: block;
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 12px;
+      border: none;
+      background: var(--secondary-color); /* 明るい青緑をボタンに */
+      color: #fff;
+      margin-top: 30px;
+      font-size: 22px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(0, 177, 173, 0.4);
+      transition: all 0.3s ease;
+      letter-spacing: 0.5px;
     }
-    .primary:disabled { background: #aaa; cursor: not-allowed; }
-    #slots { margin-top: 12px; }
-    #message { margin-top: 14px; color: #d00; font-weight: 500; font-size: 16px; }
+    .primary:hover:not(:disabled) {
+      background: var(--primary-color);
+      box-shadow: 0 8px 25px rgba(0, 123, 140, 0.5);
+      transform: translateY(-2px);
+    }
+    .primary:disabled {
+      background: #b0b0b0;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    #message {
+      margin-top: 20px;
+      font-size: 17px;
+      font-weight: 600;
+      text-align: center;
+      min-height: 25px; /* メッセージが表示されてない時もレイアウトを維持 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #message.success {
+      color: var(--success-color);
+    }
+    #message.error {
+      color: var(--error-color);
+    }
+    #message.success::before {
+      content: '✔ ';
+      font-size: 1.2em;
+      margin-right: 8px;
+      animation: checkmarkScale 0.3s ease-out;
+    }
+    #message.error::before {
+        content: '✖ ';
+        font-size: 1.2em;
+        margin-right: 8px;
+        color: var(--error-color);
+    }
+
+    @keyframes checkmarkScale {
+      0% { transform: scale(0); opacity: 0; }
+      70% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+
+    /* レスポンシブ対応 */
+    @media (max-width: 600px) {
+      body {
+        padding: 15px;
+      }
+      .container {
+        padding: 20px;
+        border-radius: 12px;
+      }
+      h2 {
+        font-size: 24px;
+        margin-bottom: 20px;
+      }
+      h3 {
+        font-size: 20px;
+        margin-top: 25px;
+        margin-bottom: 12px;
+      }
+      label {
+        font-size: 16px;
+      }
+      input[type="text"] {
+        padding: 12px 15px;
+        font-size: 16px;
+      }
+      .date-btn, .slot {
+        padding: 12px;
+        font-size: 15px;
+        border-radius: 10px;
+      }
+      .primary {
+        padding: 14px 18px;
+        font-size: 20px;
+        margin-top: 25px;
+      }
+      #message {
+        font-size: 15px;
+      }
+    }
   </style>
 </head>
 <body>
 <div class="container">
-  <h2>予約フォーム</h2>
-  <label>名前：<input id="name" type="text" placeholder="山田太郎" /></label>
+  <h2>📅 予約フォーム</h2>
+  <label for="name">名前：</label>
+  <input id="name" type="text" placeholder="山田太郎" autocomplete="name" />
 
   <h3>日付を選択</h3>
   <div id="dates"></div>
@@ -103,6 +270,7 @@ let selectedSlot = null;
 // 日付を14日分生成（2列表示）
 function renderDates() {
   const today = new Date();
+  datesEl.innerHTML = ''; // 既存の日付ボタンをクリア
   for (let i=0;i<14;i++){
     const d = new Date(today);
     d.setDate(today.getDate()+i);
@@ -111,11 +279,20 @@ function renderDates() {
     btn.className = 'date-btn';
     btn.innerText = dateStr;
     btn.onclick = () => {
-      selectedDate = dateStr;
-      selectedSlot = null;
+      if (selectedDate === dateStr) {
+        // 同じ日付を再度クリックしたら選択を解除
+        selectedDate = null;
+        selectedSlot = null;
+        slotsEl.innerHTML = ''; // スロット表示をクリア
+      } else {
+        selectedDate = dateStr;
+        selectedSlot = null;
+        fetchReservations(dateStr);
+      }
       renderDatesSelected();
-      fetchReservations(dateStr);
       updateButton();
+      messageEl.innerText = ''; // メッセージをクリア
+      messageEl.className = '';
     };
     datesEl.appendChild(btn);
   }
@@ -129,12 +306,23 @@ function renderDatesSelected() {
 
 // サーバーから予約状況取得
 function fetchReservations(dateStr){
+  messageEl.innerText = '予約状況を取得中...';
+  messageEl.className = '';
+  slotsEl.innerHTML = ''; // 取得中はスロットをクリア
   fetch(GAS_URL + "?date=" + encodeURIComponent(dateStr))
-  .then(res=>res.json())
-  .then(data=>{ renderSlots(data,dateStr); })
+  .then(res=>{
+    if (!res.ok) throw new Error('Network response was not ok.');
+    return res.json();
+  })
+  .then(data=>{
+    renderSlots(data,dateStr);
+    messageEl.innerText = ''; // 成功したらメッセージをクリア
+  })
   .catch(err=>{
     console.error("GET error:",err);
-    messageEl.innerText="サーバー接続エラー";
+    messageEl.innerText="予約状況の取得に失敗しました。";
+    messageEl.className = 'error';
+    slotsEl.innerHTML = '<p style="text-align: center; color: var(--light-text-color);">予約状況を読み込めませんでした。</p>';
   });
 }
 
@@ -153,43 +341,71 @@ function generateTimes(){
 // スロット描画
 function renderSlots(reservations,dateStr){
   slotsEl.innerHTML='';
-  if(!dateStr)return;
+  if(!dateStr){
+    slotsEl.innerHTML = '<p style="text-align: center; color: var(--light-text-color);">日付を選択してください。</p>';
+    return;
+  }
   const now=new Date();
   const todayStr=now.toISOString().slice(0,10);
   const bookedSet=new Set(reservations.map(r=>r.time));
+
+  let hasAvailableSlots = false;
 
   generateTimes().forEach(slot=>{
     const btn=document.createElement('div');
     btn.className='slot';
     btn.innerText=slot;
 
+    let isPast = false;
     if(dateStr===todayStr){
       const [hh,mm]=slot.split(':').map(Number);
-      const slotTime=new Date(dateStr+'T'+hh.toString().padStart(2,'0')+':'+mm.toString().padStart(2,'0'));
-      if(slotTime<=now)return;
+      // ローカルタイムゾーンで日付と時間を結合
+      const slotTime=new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0);
+      if(slotTime < now) {
+        isPast = true;
+      }
     }
 
-    if(bookedSet.has(slot)){
+    if(isPast || bookedSet.has(slot)){
       btn.classList.add('booked');
     }else{
       btn.onclick=()=>{
         selectedSlot=slot;
-        renderSlots(reservations,dateStr);
+        renderSlots(reservations,dateStr); // スロットの状態を再描画して選択を反映
         updateButton();
+        messageEl.innerText = ''; // メッセージをクリア
+        messageEl.className = '';
       };
+      hasAvailableSlots = true;
     }
     if(slot===selectedSlot)btn.classList.add('selected');
     slotsEl.appendChild(btn);
   });
+
+  if (!hasAvailableSlots && !bookedSet.size) {
+    slotsEl.innerHTML = '<p style="text-align: center; color: var(--light-text-color);">本日の予約枠は終了しました、またはまだ予約可能な時間がありません。</p>';
+  } else if (!hasAvailableSlots && bookedSet.size === generateTimes().length) {
+    slotsEl.innerHTML = '<p style="text-align: center; color: var(--light-text-color);">この日はすべての時間帯が予約済みです。</p>';
+  }
 }
 
 function updateButton(){
-  reserveBtn.disabled=!(nameEl.value && selectedDate && selectedSlot);
+  reserveBtn.disabled=!(nameEl.value.trim() && selectedDate && selectedSlot);
 }
 
 nameEl.addEventListener('input',updateButton);
 
 reserveBtn.onclick=()=>{
+  if (!nameEl.value.trim() || !selectedDate || !selectedSlot) {
+    messageEl.innerText = "名前、日付、時間を選択してください。";
+    messageEl.className = 'error';
+    return;
+  }
+
+  messageEl.innerText = '予約を送信中...';
+  messageEl.className = '';
+  reserveBtn.disabled = true; // 連続送信を防ぐ
+
   const form=new URLSearchParams();
   form.append('name',nameEl.value.trim());
   form.append('date',selectedDate);
@@ -200,25 +416,37 @@ reserveBtn.onclick=()=>{
     headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
     body:form.toString()
   })
-  .then(res=>res.json())
+  .then(res=>{
+    if (!res.ok) throw new Error('Network response was not ok.');
+    return res.json();
+  })
   .then(data=>{
     if(data.success){
-      messageEl.innerText=`${selectedDate} ${selectedSlot} を予約しました！`;
-      selectedSlot=null;
-      fetchReservations(selectedDate);
-      updateButton();
+      messageEl.innerText=`${nameEl.value.trim()}様、${selectedDate} ${selectedSlot} のご予約が完了しました！`;
+      messageEl.className = 'success';
+      // 予約成功後、フォームをリセット
+      nameEl.value = '';
+      selectedSlot = null; // 予約したスロットの選択を解除
+      fetchReservations(selectedDate); // 最新の予約状況を再取得
+      updateButton(); // ボタンの状態を更新
     }else{
-      messageEl.innerText=data.message||"予約に失敗しました";
+      messageEl.innerText=data.message||"予約に失敗しました。恐れ入りますが、再度お試しください。";
+      messageEl.className = 'error';
+      reserveBtn.disabled = false; // エラー時は再度送信可能にする
     }
   })
   .catch(err=>{
     console.error("POST error:",err);
-    messageEl.innerText="通信エラーが発生しました";
+    messageEl.innerText="通信エラーが発生しました。インターネット接続を確認してください。";
+    messageEl.className = 'error';
+    reserveBtn.disabled = false; // エラー時は再度送信可能にする
   });
 };
 
 // 初期化
 renderDates();
+renderSlots([], null); // 初期状態ではスロット表示なし
+updateButton(); // 初期状態のボタンを無効にする
 </script>
 </body>
 </html>
