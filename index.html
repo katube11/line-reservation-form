@@ -47,9 +47,12 @@
     }
     input[type="text"]:focus { border-color: var(--secondary-color); box-shadow: 0 0 0 4px rgba(0, 177, 173, 0.25); outline: none; }
 
+    /* --- 日付・時間選択グリッド --- */
     #dates, #slots { display: grid; gap: 15px; margin-top: 15px; }
+    /* PC/タブレットのレイアウト */
     #dates { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
     #slots { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+
     .date-btn, .slot {
       display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 18px 10px; border-radius: 14px;
       border: 1px solid var(--border-color); cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center;
@@ -63,6 +66,7 @@
     .slot.booked { background: #e9ecef; color: #999999; cursor: not-allowed; border-color: #d0d0d0; opacity: 0.8; }
     .slot.booked::after { content: '予約済'; position: absolute; bottom: 5px; right: 5px; font-size: 0.7em; font-weight: 600; color: #777; }
 
+    /* --- 予約ボタン --- */
     .primary {
       display: block; width: 100%; padding: 18px 20px; border-radius: 14px; border: none; background: var(--accent-color);
       color: #fff; margin-top: 40px; font-size: 24px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 25px rgba(255, 112, 67, 0.4);
@@ -73,6 +77,7 @@
     #message { margin-top: 25px; font-size: 18px; font-weight: 600; text-align: center; color: var(--error-color); }
     #message.error::before { content: '❌ '; font-size: 1.2em; margin-right: 5px; color: var(--error-color); }
 
+    /* --- モーダル --- */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6);
       display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px);
@@ -97,6 +102,82 @@
       font-size: 18px; font-weight: 600; cursor: pointer; transition: background 0.2s;
     }
     #modalCloseBtn:hover { background: var(--primary-color); }
+
+
+    /* ====================================================== */
+    /* ★ モバイル向けレスポンシブデザイン調整 ★ */
+    /* ====================================================== */
+    @media (max-width: 650px) {
+      body {
+        padding: 10px 0; /* 画面端の余白を減らす */
+        min-height: 100vh;
+      }
+      .container {
+        border-radius: 0; /* モバイルでは角丸をなくして画面幅いっぱいに */
+        padding: 25px 15px; /* 上下のパディングを少し減らす */
+        box-shadow: none; /* ボックスシャドウをなくす */
+        max-width: 100%;
+      }
+      h2 {
+        font-size: 28px;
+        margin-bottom: 20px;
+      }
+      h3 {
+        font-size: 20px;
+        margin-top: 25px;
+        margin-bottom: 15px;
+      }
+      label {
+        font-size: 16px;
+        margin-top: 15px;
+      }
+      input[type="text"] {
+        padding: 14px 18px;
+        font-size: 16px;
+        border-radius: 10px;
+      }
+
+      /* 日付・時間選択グリッドの調整 */
+      #dates {
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); /* 最小幅を小さく */
+        gap: 10px;
+      }
+      #slots {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* 最小幅を小さく */
+        gap: 10px;
+      }
+      .date-btn, .slot {
+        padding: 14px 8px; /* パディングを減らしてボタンを詰める */
+        font-size: 16px;
+      }
+
+      .primary {
+        padding: 16px 20px;
+        font-size: 20px;
+        margin-top: 30px;
+      }
+
+      /* モーダル */
+      .modal-content {
+        padding: 30px 20px;
+        border-radius: 12px;
+        width: 95%;
+      }
+      .modal-icon {
+        font-size: 3.5em;
+      }
+      .modal-content h4 {
+        font-size: 24px;
+      }
+      .modal-details {
+        font-size: 16px;
+        padding: 12px;
+      }
+      #modalCloseBtn {
+        font-size: 16px;
+        padding: 10px 20px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -124,8 +205,6 @@
     </div>
 </div>
 
-<!-- ====================================================== -->
-<!-- ★ LIFF SDK 読み込み ★ -->
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
 <script>
