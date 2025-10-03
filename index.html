@@ -393,7 +393,7 @@ const MAX_CAPACITY = 3;
 // ★ LIFF IDを必ず書き換えてください
 const LIFF_ID = "2008012264-GAaEPJdZ"; 
 // ★ GASのデプロイURLを必ず書き換えてください
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzh_OygIFZQq6wUNY4PlZywZyqzQmRFFt2l8PIly4XECJMMJ9-SqFhbj8oHd9Y4mwmKiA/exec"; 
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxF96vTKsA3Ud2WQi_uB--yVzi66ERokOZQJqslwlFp5WwAmMVeZzERfQOo0llYx_AJuw/exec"; 
 
 // ----------------- LIFF初期化 -----------------
 let liffUserId = '';
@@ -433,6 +433,10 @@ let selectedSlot = null;
 // モーダルを閉じる
 modalCloseBtn.onclick = () => {
   modal.classList.remove('active');
+  if (selectedDate) {
+    console.log('[v0] モーダルを閉じて予約状況を再取得');
+    fetchReservations(selectedDate);
+  }
 };
 
 // 日付生成（今日から7日間）
@@ -614,12 +618,16 @@ reserveBtn.onclick = () => {
       modal.classList.add('active');
       selectedSlot = null;
       menuOptions.forEach(cb => cb.checked = false);
-      fetchReservations(selectedDate);
+      setTimeout(() => {
+        console.log('[v0] 予約成功後に予約状況を再取得');
+        fetchReservations(selectedDate);
+      }, 500);
       updateButton();
     } else {
       messageEl.innerText = data.message || "予約に失敗しました。満席の可能性があります。";
       messageEl.className = 'error';
       reserveBtn.disabled = false;
+      console.log('[v0] 予約失敗後に予約状況を再取得');
       fetchReservations(selectedDate); 
     }
   })
@@ -628,6 +636,7 @@ reserveBtn.onclick = () => {
     messageEl.innerText = "通信エラーが発生しました。接続を確認してください。";
     messageEl.className = 'error';
     reserveBtn.disabled = false;
+    console.log('[v0] エラー後に予約状況を再取得');
     fetchReservations(selectedDate);
   });
 };
