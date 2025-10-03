@@ -393,7 +393,7 @@ const MAX_CAPACITY = 3;
 // ★ LIFF IDを必ず書き換えてください
 const LIFF_ID = "2008012264-GAaEPJdZ"; 
 // ★ GASのデプロイURLを必ず書き換えてください
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxF96vTKsA3Ud2WQi_uB--yVzi66ERokOZQJqslwlFp5WwAmMVeZzERfQOo0llYx_AJuw/exec"; 
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxQoxB5gTPIbAKipg21DXXDlwzmBTJ8pr7HRVQm3YPn0i1R0oc4iLCZZSnmqB6l_iUQQQ/exec"; 
 
 // ----------------- LIFF初期化 -----------------
 let liffUserId = '';
@@ -608,21 +608,30 @@ reserveBtn.onclick = () => {
   .then(data => {
     console.log('[v0] 予約結果:', data);
     if (data.success) {
-      const formattedDate = reservationDate.replace(/-/g, '/');
-      modalDetails.innerHTML = `
-        <p>ご予約ありがとうございます、<strong>${reservationName}</strong>様。</p>
-        <p>予約内容をご確認ください。</p>
-        <strong>🗓 日時: ${formattedDate} ${reservationTime}<br>
-             ✨ メニュー: ${reservationMenu}</strong>
-      `;
-      modal.classList.add('active');
-      selectedSlot = null;
-      menuOptions.forEach(cb => cb.checked = false);
+      console.log('[v0] 予約成功 - 予約状況を更新中...');
+      messageEl.innerText = '予約完了！空き席を更新中...';
+      messageEl.className = 'success';
+      
+      // 1秒待ってから予約状況を取得（GASの書き込み完了を待つ）
       setTimeout(() => {
-        console.log('[v0] 予約成功後に予約状況を再取得');
         fetchReservations(selectedDate);
-      }, 500);
-      updateButton();
+        
+        // さらに500ms後にモーダルを表示（画面更新を確実にする）
+        setTimeout(() => {
+          const formattedDate = reservationDate.replace(/-/g, '/');
+          modalDetails.innerHTML = `
+            <p>ご予約ありがとうございます、<strong>${reservationName}</strong>様。</p>
+            <p>予約内容をご確認ください。</p>
+            <strong>🗓 日時: ${formattedDate} ${reservationTime}<br>
+                 ✨ メニュー: ${reservationMenu}</strong>
+          `;
+          modal.classList.add('active');
+          selectedSlot = null;
+          menuOptions.forEach(cb => cb.checked = false);
+          updateButton();
+          messageEl.innerText = '';
+        }, 500);
+      }, 1000);
     } else {
       messageEl.innerText = data.message || "予約に失敗しました。満席の可能性があります。";
       messageEl.className = 'error';
