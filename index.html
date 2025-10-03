@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>美容院 予約フォーム</title>
-  <!-- Google Fonts: Playfair Display (エレガントな見出し用) と Noto Sans JP を追加 -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -205,17 +204,6 @@
   </style>
 </head>
 <body>
-<!-- ヒーローセクションを完全に削除 -->
-<!--
-<div class="hero-section">
-  <img src="https://via.placeholder.com/600x250/7395AE/FFFFFF?text=Welcome+to+Our+Salon" alt="美容院のイメージ写真" class="hero-image">
-  <div class="hero-text">
-    <h1>理想のスタイルを叶える予約フォーム</h1>
-    <p>あなたの「なりたい」を、私たちがお手伝いします。</p>
-  </div>
-</div>
--->
-
 <div class="container">
   <label for="name">お名前</label>
   <input id="name" type="text" placeholder="例: 山田太郎" autocomplete="name" />
@@ -241,7 +229,7 @@
 <div id="reservationModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-icon">✅</div>
-        <h4>ご予約が完了いたしました！</h4>
+        <h4>ご予約が完了いたしました!</h4>
         <div id="modalDetails" class="modal-details"></div>
         <button id="modalCloseBtn">閉じる</button>
     </div>
@@ -251,102 +239,32 @@
 
 <script>
 // ----------------- 共通設定 -----------------
-// ★ 席数
 const MAX_CAPACITY = 3; 
 // ★ LIFF IDを必ず書き換えてください
 const LIFF_ID = "2008012264-GAaEPJdZ"; 
 // ★ GASのデプロイURLを必ず書き換えてください
-// GASのURLは、ご自身の最新のデプロイURLに置き換えてください
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyFMjXT8Jx86BUEPJa17kOC-7-WNz_ig2xj_ekfT0UqnAmoqycFmIMuH3N5ga_2DYam8Q/exec"; 
+const GAS_URL = "https://script.google.com/macros/s/AKfycbx-KvJLQenKIySwr5jntiG3Fv0a5pJNRAPNX7OWdvZdAVL-Nyh0TkzORFVMDpTc-__j0Q/exec"; 
 
 // ----------------- LIFF初期化 -----------------
-let liffUserId = null;
-
-async function initializeLiff() {
-    try {
-        await liff.init({ liffId: LIFF_ID });
-        if (!liff.isLoggedIn()) {
-            liff.login();
-        } else {
-            const profile = await liff.getProfile();
-            liffUserId = profile.userId;
-            if (profile.displayName) {
-                document.getElementById('name').value = profile.displayName;
-                updateButton();
-            }
-        }
-    } catch (err) {
-        console.error("LIFF初期化エラー:", err);
-    }
-}
-initializeLiff();
 
 // ----------------- DOM要素と変数 -----------------
-const datesEl = document.getElementById('dates');
-const slotsEl = document.getElementById('slots');
-const reserveBtn = document.getElementById('reserveBtn');
-const messageEl = document.getElementById('message');
-const nameEl = document.getElementById('name');
-const menuOptions = document.querySelectorAll('input[name="menu"]');
-const modal = document.getElementById('reservationModal');
-const modalDetails = document.getElementById('modalDetails');
-const modalCloseBtn = document.getElementById('modalCloseBtn');
-
-let selectedDate = null;
-let selectedSlot = null;
-
-modalCloseBtn.onclick = () => {
-    modal.classList.remove('active');
-    if (liff.isInClient()) liff.closeWindow(); 
-};
-modal.onclick = (e) => {
-    if (e.target === modal) modal.classList.remove('active');
-};
 
 // 日付生成
-function renderDates() {
-  const today = new Date();
-  datesEl.innerHTML = ''; 
-  const dayNames = ["日","月","火","水","木","金","土"];
-  for (let i=0;i<14;i++){
-    const d=new Date(today);
-    d.setDate(today.getDate()+i);
-    const dateStr = d.toISOString().slice(0,10);
-    const dayOfWeek = dayNames[d.getDay()];
-    const btn = document.createElement('div');
-    btn.className='date-btn';
-    btn.innerHTML=`<div>${dateStr.slice(5).replace('-', '/')}</div><div class="day-of-week">(${dayOfWeek})</div>`;
-    btn.onclick=()=>{ 
-        selectedDate=dateStr; 
-        selectedSlot=null; 
-        fetchReservations(dateStr); 
-        renderDatesSelected(); 
-        updateButton(); 
-        messageEl.innerText=''; 
-        messageEl.className=''; 
-    };
-    datesEl.appendChild(btn);
-  }
-}
-function renderDatesSelected() {
-  [...datesEl.children].forEach(btn=>{
-    const btnDateText = btn.firstElementChild.innerText;
-    const selectedMonthDay = selectedDate ? selectedDate.slice(5).replace('-','/') : null;
-    btn.classList.toggle('selected', selectedMonthDay===btnDateText);
-  });
-}
 
-// 予約状況取得 (予約件数情報を含むリストを取得)
+// 予約状況取得
 function fetchReservations(dateStr){
   messageEl.innerText='予約状況を取得中...';
   messageEl.className='';
   slotsEl.innerHTML='';
   fetch(GAS_URL+"?date="+encodeURIComponent(dateStr))
     .then(res=>{if(!res.ok)throw new Error('Network response not ok'); return res.json();})
-    // GASから予約件数情報を受け取る
-    .then(slotDetails=>{ renderSlots(slotDetails,dateStr); messageEl.innerText=''; }) 
+    .then(slotDetails=>{ 
+      console.log('[v0] 予約状況を取得しました:', slotDetails);
+      renderSlots(slotDetails,dateStr); 
+      messageEl.innerText=''; 
+    }) 
     .catch(err=>{ 
-        console.error(err); 
+        console.error('[v0] 予約状況の取得エラー:', err); 
         messageEl.innerText="予約状況の取得に失敗しました。"; 
         messageEl.className='error'; 
         slotsEl.innerHTML='<p style="text-align:center;color:var(--light-text-color)">予約状況を読み込めませんでした。</p>'; 
@@ -364,7 +282,6 @@ function renderSlots(slotDetails, dateStr){
   const now=new Date();
   const todayStr = now.toISOString().slice(0,10);
   
-  // 予約件数情報をMapに格納 (Key: 時間, Value: {count: N, isFull: true/false})
   const reservationMap = new Map(slotDetails.map(detail => [detail.time, detail])); 
   
   const oneHourLater = new Date(now.getTime()+60*60*1000);
@@ -375,23 +292,23 @@ function renderSlots(slotDetails, dateStr){
     const btn=document.createElement('div');
     btn.className='slot';
     
-    // 残席数の計算
     const detail = reservationMap.get(slot);
+    const remaining = detail ? detail.remaining : MAX_CAPACITY;
     const count = detail ? detail.count : 0;
-    const remaining = MAX_CAPACITY - count;
     
-    // ボタンの内部構造
+    console.log(`[v0] ${slot} - 予約数: ${count}, 残席: ${remaining}`);
+    
     btn.innerHTML=`<div>${slot}</div><div class="remaining">空き: ${remaining}席</div>`;
 
     let isPast=false;
     if(dateStr===todayStr){
       const [h,m]=slot.split(':').map(Number);
-      if(h*60+m < thresholdMinutes) isPast=true; // 1時間以内の直近の時間は過去とみなす
+      if(h*60+m < thresholdMinutes) isPast=true;
     }
     
-    // 過去の時間、または満席の場合 (remaining <= 0) は予約不可
     if(isPast || remaining <= 0) {
         btn.classList.add('booked');
+        console.log(`[v0] ${slot} は予約不可 (過去: ${isPast}, 残席: ${remaining})`);
     } else {
       btn.onclick=()=>{ selectedSlot=slot; renderSlots(slotDetails,dateStr); updateButton(); messageEl.innerText=''; messageEl.className=''; };
       hasAvailable=true;
@@ -405,16 +322,6 @@ function renderSlots(slotDetails, dateStr){
 }
 
 // ボタン制御
-function updateButton(){ 
-    const isNameValid = nameEl.value.trim().length > 0;
-    const isMenuSelected = Array.from(menuOptions).some(cb => cb.checked);
-    const isDateTimeSelected = selectedDate && selectedSlot;
-    
-    reserveBtn.disabled = !(isNameValid && isMenuSelected && isDateTimeSelected); 
-}
-nameEl.addEventListener('input', updateButton);
-menuOptions.forEach(cb => cb.addEventListener('change', updateButton));
-
 
 // 予約送信
 reserveBtn.onclick=()=>{
@@ -428,6 +335,9 @@ reserveBtn.onclick=()=>{
     messageEl.className='error';
     return;
   }
+  
+  console.log('[v0] 予約を送信:', { reservationName, reservationMenu, reservationDate, reservationTime });
+  
   messageEl.innerText='予約を送信中...';
   messageEl.className='';
   reserveBtn.disabled=true;
@@ -446,6 +356,7 @@ reserveBtn.onclick=()=>{
   })
   .then(res=>{if(!res.ok)throw new Error('Network response not ok'); return res.json();})
   .then(data=>{
+    console.log('[v0] 予約結果:', data);
     if(data.success){
       const formattedDate = reservationDate.replace(/-/g,'/');
       modalDetails.innerHTML = `
@@ -455,10 +366,9 @@ reserveBtn.onclick=()=>{
              ✨ メニュー: ${reservationMenu}</strong>
       `;
       modal.classList.add('active');
-      // フォームをリセット 
       selectedSlot=null;
       menuOptions.forEach(cb => cb.checked = false);
-      fetchReservations(selectedDate); // 予約状況を更新
+      fetchReservations(selectedDate);
       updateButton();
     } else {
       messageEl.innerText = data.message||"予約に失敗しました。満席の可能性があります。";
@@ -468,7 +378,7 @@ reserveBtn.onclick=()=>{
     }
   })
   .catch(err=>{
-    console.error(err);
+    console.error('[v0] 予約送信エラー:', err);
     messageEl.innerText="通信エラーが発生しました。接続を確認してください。";
     messageEl.className='error';
     reserveBtn.disabled=false;
