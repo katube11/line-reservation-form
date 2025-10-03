@@ -7,214 +7,364 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <style>
     :root {
-      /* 新しいカラースキーム */
-      --primary-color: #5D5C61; /* 深いグレー系 */
-      --secondary-color: #7395AE; /* 青みがかったグレー */
-      --accent-color: #B1A296; /* 落ち着いたベージュ/ゴールド系 */
-      --background-color: #E6E6EA; /* 明るいグレージュ */
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --accent-color: #e74c3c;
+      --background-color: #ecf0f1;
       --card-background: #ffffff;
-      --text-color: #333333;
-      --light-text-color: #6a6a6a;
-      --border-color: #d8d8d8;
-      --shadow-medium: 0 10px 30px rgba(0,0,0,0.1);
-      --success-color: #4CAF50;
-      --error-color: #EF5350;
+      --text-color: #2c3e50;
+      --light-text-color: #7f8c8d;
+      --border-color: #bdc3c7;
+      --success-color: #27ae60;
+      --error-color: #e74c3c;
+      --shadow: 0 2px 8px rgba(0,0,0,0.1);
+      --shadow-hover: 0 4px 12px rgba(0,0,0,0.15);
     }
 
-    * { box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Noto Sans JP', 'Inter', sans-serif;
-      background: var(--background-color);
-      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
       padding: 20px;
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      min-height: 100vh; /* 写真がないため、フォームが中央に表示されるように調整 */
       color: var(--text-color);
-      flex-direction: column;
     }
-    /* ヒーローセクション関連のCSSも削除 */
-    /* .hero-section, .hero-image, .hero-text などのスタイルは不要になります */
 
     .container {
-      background: var(--card-background);
-      border-radius: 20px;
-      box-shadow: var(--shadow-medium);
-      padding: 40px;
       max-width: 600px;
+      margin: 0 auto;
+      background: var(--card-background);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      color: var(--primary-color);
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 2rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--light-text-color);
+      margin-bottom: 30px;
+      font-size: 0.95rem;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+
+    input[type="text"] {
       width: 100%;
-      /* 写真を削除したため、トップマージンを調整 */
-      margin-top: 0; 
+      padding: 12px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
     }
-    
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+    }
+
     h3 {
-        font-size: 26px;
-        margin-top: 40px;
-        margin-bottom: 20px;
-        color: var(--primary-color);
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        position: relative;
-        padding-bottom: 10px;
-    }
-    h3::before {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 50px;
-        height: 4px;
-        background-color: var(--accent-color);
-        border-radius: 2px;
-    }
-    label { display: block; margin-top: 20px; font-weight: 600; font-size: 18px; color: var(--light-text-color); margin-bottom: 5px; }
-    input[type="text"], select {
-      width: 100%; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color); margin-top: 5px; font-size: 18px;
-      box-shadow: inset 0 1px 4px rgba(0,0,0,0.08); transition: border-color 0.3s, box-shadow 0.3s;
-    }
-    select { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236a6a6a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 20px center; background-size: 14px; }
-    input[type="text"]:focus, select:focus {
-        border-color: var(--secondary-color);
-        box-shadow: 0 0 0 5px rgba(115, 149, 174, 0.2);
-        outline: none;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      color: var(--primary-color);
+      font-size: 1.1rem;
+      font-weight: 600;
     }
 
-    .menu-group { border: 1px solid var(--border-color); border-radius: 12px; padding: 15px 20px; display: flex; flex-direction: column; gap: 12px; margin-top: 5px; background: var(--background-color); }
-    .menu-group label { margin: 0; font-size: 16px; font-weight: 400; display: flex; align-items: center; color: var(--text-color); }
-    .menu-group input[type="checkbox"] { margin-right: 10px; transform: scale(1.3); cursor: pointer; accent-color: var(--secondary-color); }
-
-    #dates, #slots { display: grid; gap: 15px; margin-top: 15px; }
-    #dates { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
-    #slots { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
-
-    .date-btn, .slot {
-      display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 18px 10px; border-radius: 14px;
-      border: 1px solid var(--border-color); cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center;
-      font-size: 17px; font-weight: 500; transition: all 0.3s ease-in-out; background-color: var(--card-background);
-      position: relative;
-    }
-    .date-btn:hover:not(.selected), .slot:hover:not(.selected):not(.booked) {
-        transform: translateY(-4px) scale(1.02);
-        border-color: var(--secondary-color);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    }
-    .date-btn.selected, .slot.selected {
-        background: var(--primary-color);
-        color: #fff;
-        border-color: var(--primary-color);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    .menu-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 10px;
     }
 
-    .slot .remaining {
-        font-size: 0.8em;
-        font-weight: 700;
-        margin-top: 3px;
-        color: var(--success-color);
+    .menu-group label {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 0;
+      font-weight: 400;
     }
-    .date-btn .day-of-week { font-size: 0.9em; color: var(--light-text-color); margin-top: 5px; font-weight: 400; }
-    
-    .date-btn.selected .day-of-week { color: rgba(255, 255, 255, 0.8); }
-    .slot.booked { background: #e9ecef; color: #999999; cursor: not-allowed; border-color: #d0d0d0; opacity: 0.8; }
+
+    .menu-group label:hover {
+      border-color: var(--secondary-color);
+      background-color: #f8f9fa;
+    }
+
+    .menu-group input[type="checkbox"] {
+      margin-right: 10px;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .menu-group input[type="checkbox"]:checked + span {
+      font-weight: 600;
+      color: var(--secondary-color);
+    }
+
+    #dates {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .date {
+      padding: 12px;
+      text-align: center;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: var(--card-background);
+    }
+
+    .date:hover {
+      border-color: var(--secondary-color);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .date.selected {
+      background: var(--secondary-color);
+      color: white;
+      border-color: var(--secondary-color);
+      font-weight: 600;
+    }
+
+    #slots {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .slot {
+      padding: 12px;
+      text-align: center;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: var(--card-background);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .slot:hover:not(.booked) {
+      border-color: var(--secondary-color);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .slot.selected {
+      background: var(--secondary-color);
+      color: white;
+      border-color: var(--secondary-color);
+      font-weight: 600;
+    }
+
+    .slot.booked {
+      background: #f5f5f5;
+      color: var(--light-text-color);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .remaining {
+      font-size: 0.85rem;
+      color: var(--success-color);
+      font-weight: 500;
+    }
+
     .slot.booked .remaining {
-        color: var(--error-color);
-    }
-    .slot.booked::after { 
-        content: '満席'; 
-        position: absolute; 
-        bottom: 5px; 
-        right: 5px; 
-        font-size: 0.7em; 
-        font-weight: 600; 
-        color: var(--error-color); 
-    }
-    .slot.booked .remaining {
-        visibility: hidden;
+      color: var(--error-color);
     }
 
-    .primary {
-      display: block; width: 100%; padding: 18px 20px; border-radius: 14px; border: none;
-      background: linear-gradient(135deg, var(--accent-color) 0%, #a09187 100%);
-      color: #fff; margin-top: 45px;
-      font-size: 24px; font-weight: 700; cursor: pointer;
-      box-shadow: 0 10px 30px rgba(177, 162, 150, 0.5);
-      transition: all 0.3s ease;
-      letter-spacing: 0.5px;
+    .slot.selected .remaining {
+      color: white;
     }
-    .primary:hover:not(:disabled) {
-        background: linear-gradient(135deg, #a09187 0%, var(--accent-color) 100%);
-        transform: translateY(-5px) scale(1.01);
-        box-shadow: 0 15px 40px rgba(177, 162, 150, 0.6);
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'Noto Sans JP', sans-serif;
     }
-    .primary:disabled { background: #bdbdbd; cursor: not-allowed; opacity: 0.6; box-shadow: none; }
-    #message { margin-top: 25px; font-size: 18px; font-weight: 600; text-align: center; color: var(--error-color); }
-    #message.error::before { content: '❌ '; font-size: 1.2em; margin-right: 5px; color: var(--error-color); }
+
+    button.primary {
+      background: var(--secondary-color);
+      color: white;
+    }
+
+    button.primary:hover:not(:disabled) {
+      background: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    button:disabled {
+      background: var(--border-color);
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    #message {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    #message.error {
+      background: #fee;
+      color: var(--error-color);
+      border: 1px solid var(--error-color);
+    }
+
+    #message.success {
+      background: #efe;
+      color: var(--success-color);
+      border: 1px solid var(--success-color);
+    }
 
     .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6);
-      display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px);
-      opacity: 0; transition: opacity 0.3s ease-in-out;
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
     }
-    .modal-overlay.active { display: flex; opacity: 1; }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
     .modal-content {
-      background: var(--card-background); padding: 40px; border-radius: 16px; max-width: 450px; width: 90%;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); text-align: center; transform: scale(0.8); opacity: 0;
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
     }
-    .modal-overlay.active .modal-content { transform: scale(1); opacity: 1; }
-    .modal-icon { font-size: 4em; color: var(--success-color); margin-bottom: 15px; }
-    .modal-content h4 { font-size: 28px; color: var(--primary-color); margin-top: 0; margin-bottom: 20px; font-weight: 700; }
+
+    .modal-icon {
+      font-size: 3rem;
+      margin-bottom: 15px;
+    }
+
+    .modal-content h4 {
+      color: var(--primary-color);
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+    }
+
     .modal-details {
-      background: var(--background-color); padding: 15px; border-radius: 10px; margin-bottom: 25px;
-      font-size: 17px; font-weight: 500; line-height: 1.8; text-align: left;
+      margin: 20px 0;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      color: var(--text-color);
+      line-height: 1.6;
     }
-    .modal-details strong { color: var(--accent-color); font-weight: 700; font-size: 1.1em; display: block; margin-top: 5px; }
+
+    .modal-details strong {
+      display: block;
+      margin-top: 10px;
+      color: var(--secondary-color);
+    }
+
     #modalCloseBtn {
-      background: var(--secondary-color); color: white; border: none; padding: 12px 25px; border-radius: 10px;
-      font-size: 18px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+      margin-top: 20px;
+      background: var(--secondary-color);
+      color: white;
     }
-    #modalCloseBtn:hover { background: var(--primary-color); }
 
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px;
+      }
 
-    @media (max-width: 650px) {
-      body { padding: 10px 0; min-height: 100vh; }
-      /* ヒーローセクションを削除したため、これらのメディアクエリも影響しないか、調整が必要な場合がある */
-      /* .hero-section { border-radius: 0; margin-bottom: 20px; } */
-      /* .hero-image { height: 180px; } */
-      /* .hero-text h1 { font-size: 28px; } */
-      /* .hero-text p { font-size: 16px; } */
+      h1 {
+        font-size: 1.5rem;
+      }
 
-      .container { border-radius: 0; padding: 25px 15px; box-shadow: none; max-width: 100%; }
-      h3 { font-size: 22px; margin-top: 30px; margin-bottom: 15px; padding-bottom: 8px; }
-      h3::before { width: 40px; height: 3px; }
-      label { font-size: 16px; margin-top: 15px; }
-      input[type="text"], select { padding: 14px 18px; font-size: 16px; border-radius: 10px; }
-      .menu-group { padding: 10px 15px; gap: 8px; }
-      #dates { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
-      #slots { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 10px; }
-      .date-btn, .slot { padding: 14px 8px; font-size: 16px; }
-      .primary { padding: 16px 20px; font-size: 20px; margin-top: 30px; }
-      .modal-content { padding: 30px 20px; border-radius: 12px; width: 95%; }
-      .modal-icon { font-size: 3.5em; }
-      .modal-content h4 { font-size: 24px; }
-      .modal-details { font-size: 16px; padding: 12px; }
+      #dates {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      }
+
+      #slots {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      }
     }
   </style>
 </head>
 <body>
+
 <div class="container">
+  <h1>✨ 美容院予約</h1>
+  <p class="subtitle">ご希望の日時を選択してください</p>
+
   <label for="name">お名前</label>
   <input id="name" type="text" placeholder="例: 山田太郎" autocomplete="name" />
 
   <h3>ご希望のメニューを選択してください (必須)</h3>
   <div id="menuOptions" class="menu-group">
-    <label><input type="checkbox" name="menu" value="カット (60分)"> カット</label>
-    <label><input type="checkbox" name="menu" value="カラー (90分)"> カラー</label>
-    <label><input type="checkbox" name="menu" value="パーマ (120分)"> パーマ</label>
-    <label><input type="checkbox" name="menu" value="トリートメント (30分)"> トリートメント</label>
-</div>
+    <label>
+      <input type="checkbox" name="menu" value="カット (60分)">
+      <span>カット (60分)</span>
+    </label>
+    <label>
+      <input type="checkbox" name="menu" value="カラー (90分)">
+      <span>カラー (90分)</span>
+    </label>
+    <label>
+      <input type="checkbox" name="menu" value="パーマ (120分)">
+      <span>パーマ (120分)</span>
+    </label>
+    <label>
+      <input type="checkbox" name="menu" value="トリートメント (30分)">
+      <span>トリートメント (30分)</span>
+    </label>
+  </div>
 
   <h3>日付を選択してください</h3>
   <div id="dates"></div>
@@ -227,12 +377,12 @@
 </div>
 
 <div id="reservationModal" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-icon">✅</div>
-        <h4>ご予約が完了いたしました!</h4>
-        <div id="modalDetails" class="modal-details"></div>
-        <button id="modalCloseBtn">閉じる</button>
-    </div>
+  <div class="modal-content">
+    <div class="modal-icon">✅</div>
+    <h4>ご予約が完了いたしました!</h4>
+    <div id="modalDetails" class="modal-details"></div>
+    <button id="modalCloseBtn">閉じる</button>
+  </div>
 </div>
 
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -246,142 +396,239 @@ const LIFF_ID = "2008012264-GAaEPJdZ";
 const GAS_URL = "https://script.google.com/macros/s/AKfycbx-KvJLQenKIySwr5jntiG3Fv0a5pJNRAPNX7OWdvZdAVL-Nyh0TkzORFVMDpTc-__j0Q/exec"; 
 
 // ----------------- LIFF初期化 -----------------
+let liffUserId = '';
+
+liff.init({ liffId: LIFF_ID })
+  .then(() => {
+    console.log('[v0] LIFF初期化成功');
+    if (liff.isLoggedIn()) {
+      liff.getProfile().then(profile => {
+        liffUserId = profile.userId;
+        console.log('[v0] LINEユーザーID:', liffUserId);
+      }).catch(err => {
+        console.error('[v0] プロフィール取得エラー:', err);
+      });
+    } else {
+      console.log('[v0] LINEログインしていません');
+    }
+  })
+  .catch(err => {
+    console.error('[v0] LIFF初期化エラー:', err);
+  });
 
 // ----------------- DOM要素と変数 -----------------
+const nameEl = document.getElementById('name');
+const menuOptions = document.querySelectorAll('input[name="menu"]');
+const datesEl = document.getElementById('dates');
+const slotsEl = document.getElementById('slots');
+const reserveBtn = document.getElementById('reserveBtn');
+const messageEl = document.getElementById('message');
+const modal = document.getElementById('reservationModal');
+const modalDetails = document.getElementById('modalDetails');
+const modalCloseBtn = document.getElementById('modalCloseBtn');
 
-// 日付生成
+let selectedDate = null;
+let selectedSlot = null;
 
-// 予約状況取得
-function fetchReservations(dateStr){
-  messageEl.innerText='予約状況を取得中...';
-  messageEl.className='';
-  slotsEl.innerHTML='';
-  fetch(GAS_URL+"?date="+encodeURIComponent(dateStr))
-    .then(res=>{if(!res.ok)throw new Error('Network response not ok'); return res.json();})
-    .then(slotDetails=>{ 
+// モーダルを閉じる
+modalCloseBtn.onclick = () => {
+  modal.classList.remove('active');
+};
+
+// 日付生成（今日から7日間）
+function renderDates() {
+  datesEl.innerHTML = '';
+  const today = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const dateStr = d.toISOString().slice(0, 10);
+    const displayDate = `${d.getMonth() + 1}/${d.getDate()}`;
+    const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+    const dayName = dayNames[d.getDay()];
+
+    const btn = document.createElement('div');
+    btn.className = 'date';
+    btn.innerHTML = `${displayDate}<br>(${dayName})`;
+    btn.onclick = () => {
+      selectedDate = dateStr;
+      selectedSlot = null;
+      renderDates();
+      fetchReservations(dateStr);
+      updateButton();
+    };
+    if (dateStr === selectedDate) btn.classList.add('selected');
+    datesEl.appendChild(btn);
+  }
+}
+
+function fetchReservations(dateStr) {
+  console.log('[v0] 予約状況を取得開始:', dateStr);
+  messageEl.innerText = '予約状況を取得中...';
+  messageEl.className = '';
+  slotsEl.innerHTML = '';
+  
+  fetch(GAS_URL + "?date=" + encodeURIComponent(dateStr))
+    .then(res => {
+      if (!res.ok) throw new Error('Network response not ok');
+      return res.json();
+    })
+    .then(slotDetails => { 
       console.log('[v0] 予約状況を取得しました:', slotDetails);
-      renderSlots(slotDetails,dateStr); 
-      messageEl.innerText=''; 
+      renderSlots(slotDetails, dateStr); 
+      messageEl.innerText = ''; 
     }) 
-    .catch(err=>{ 
-        console.error('[v0] 予約状況の取得エラー:', err); 
-        messageEl.innerText="予約状況の取得に失敗しました。"; 
-        messageEl.className='error'; 
-        slotsEl.innerHTML='<p style="text-align:center;color:var(--light-text-color)">予約状況を読み込めませんでした。</p>'; 
-        reserveBtn.disabled = true; 
+    .catch(err => { 
+      console.error('[v0] 予約状況の取得エラー:', err); 
+      messageEl.innerText = "予約状況の取得に失敗しました。"; 
+      messageEl.className = 'error'; 
+      slotsEl.innerHTML = '<p style="text-align:center;color:var(--light-text-color)">予約状況を読み込めませんでした。</p>'; 
+      reserveBtn.disabled = true; 
     });
 }
 
 // 時間生成 (09:00〜17:00まで30分刻み)
-function generateTimes(){ const out=[]; let start=9*60,end=17*60,step=30; for(let cur=start;cur<=end;cur+=step){ const hh=String(Math.floor(cur/60)).padStart(2,'0'); const mm=String(cur%60).padStart(2,'0'); out.push(`${hh}:${mm}`); } return out; }
+function generateTimes() {
+  const out = [];
+  let start = 9 * 60, end = 17 * 60, step = 30;
+  for (let cur = start; cur <= end; cur += step) {
+    const hh = String(Math.floor(cur / 60)).padStart(2, '0');
+    const mm = String(cur % 60).padStart(2, '0');
+    out.push(`${hh}:${mm}`);
+  }
+  return out;
+}
 
-// スロット描画
-function renderSlots(slotDetails, dateStr){
-  slotsEl.innerHTML='';
-  if(!dateStr){ slotsEl.innerHTML='<p style="text-align:center;color:var(--light-text-color)">日付を選択してください。</p>'; return; }
-  const now=new Date();
-  const todayStr = now.toISOString().slice(0,10);
+function renderSlots(slotDetails, dateStr) {
+  slotsEl.innerHTML = '';
+  if (!dateStr) {
+    slotsEl.innerHTML = '<p style="text-align:center;color:var(--light-text-color)">日付を選択してください。</p>';
+    return;
+  }
+  
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0, 10);
   
   const reservationMap = new Map(slotDetails.map(detail => [detail.time, detail])); 
   
-  const oneHourLater = new Date(now.getTime()+60*60*1000);
-  const thresholdMinutes = oneHourLater.getHours()*60 + oneHourLater.getMinutes();
-  let hasAvailable=false;
+  const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+  const thresholdMinutes = oneHourLater.getHours() * 60 + oneHourLater.getMinutes();
+  let hasAvailable = false;
 
-  generateTimes().forEach(slot=>{
-    const btn=document.createElement('div');
-    btn.className='slot';
+  generateTimes().forEach(slot => {
+    const btn = document.createElement('div');
+    btn.className = 'slot';
     
     const detail = reservationMap.get(slot);
     const remaining = detail ? detail.remaining : MAX_CAPACITY;
     const count = detail ? detail.count : 0;
     
-    console.log(`[v0] ${slot} - 予約数: ${count}, 残席: ${remaining}`);
+    console.log(`[v0] ${dateStr} ${slot} - 予約数: ${count}, 残席: ${remaining}`);
     
-    btn.innerHTML=`<div>${slot}</div><div class="remaining">空き: ${remaining}席</div>`;
+    btn.innerHTML = `<div>${slot}</div><div class="remaining">${remaining > 0 ? '空き: ' + remaining + '席' : '満席'}</div>`;
 
-    let isPast=false;
-    if(dateStr===todayStr){
-      const [h,m]=slot.split(':').map(Number);
-      if(h*60+m < thresholdMinutes) isPast=true;
+    let isPast = false;
+    if (dateStr === todayStr) {
+      const [h, m] = slot.split(':').map(Number);
+      if (h * 60 + m < thresholdMinutes) isPast = true;
     }
     
-    if(isPast || remaining <= 0) {
-        btn.classList.add('booked');
-        console.log(`[v0] ${slot} は予約不可 (過去: ${isPast}, 残席: ${remaining})`);
+    if (isPast || remaining <= 0) {
+      btn.classList.add('booked');
+      console.log(`[v0] ${slot} は予約不可 (過去: ${isPast}, 残席: ${remaining})`);
     } else {
-      btn.onclick=()=>{ selectedSlot=slot; renderSlots(slotDetails,dateStr); updateButton(); messageEl.innerText=''; messageEl.className=''; };
-      hasAvailable=true;
+      btn.onclick = () => {
+        selectedSlot = slot;
+        renderSlots(slotDetails, dateStr);
+        updateButton();
+        messageEl.innerText = '';
+        messageEl.className = '';
+      };
+      hasAvailable = true;
     }
     
-    if(slot===selectedSlot) btn.classList.add('selected');
+    if (slot === selectedSlot) btn.classList.add('selected');
     slotsEl.appendChild(btn);
   });
 
-  if(!hasAvailable){ slotsEl.innerHTML='<p style="text-align:center;color:var(--light-text-color)">この日は予約可能な時間がありません。別の日付を選択してください。</p>'; }
+  if (!hasAvailable) {
+    slotsEl.innerHTML = '<p style="text-align:center;color:var(--light-text-color)">この日は予約可能な時間がありません。別の日付を選択してください。</p>';
+  }
 }
 
 // ボタン制御
+function updateButton() {
+  const reservationName = nameEl.value.trim();
+  const reservationMenu = Array.from(menuOptions).filter(cb => cb.checked).length > 0;
+  const hasSelection = reservationName && reservationMenu && selectedDate && selectedSlot;
+  reserveBtn.disabled = !hasSelection;
+}
 
-// 予約送信
-reserveBtn.onclick=()=>{
-  const reservationName=nameEl.value.trim();
+nameEl.addEventListener('input', updateButton);
+menuOptions.forEach(cb => cb.addEventListener('change', updateButton));
+
+reserveBtn.onclick = () => {
+  const reservationName = nameEl.value.trim();
   const reservationMenu = Array.from(menuOptions).filter(cb => cb.checked).map(cb => cb.value).join(', ');
-  const reservationDate=selectedDate;
-  const reservationTime=selectedSlot;
+  const reservationDate = selectedDate;
+  const reservationTime = selectedSlot;
 
-  if(!reservationName || !reservationMenu || !reservationDate || !reservationTime){
-    messageEl.innerText="すべての項目を選択・入力してください。";
-    messageEl.className='error';
+  if (!reservationName || !reservationMenu || !reservationDate || !reservationTime) {
+    messageEl.innerText = "すべての項目を選択・入力してください。";
+    messageEl.className = 'error';
     return;
   }
   
   console.log('[v0] 予約を送信:', { reservationName, reservationMenu, reservationDate, reservationTime });
   
-  messageEl.innerText='予約を送信中...';
-  messageEl.className='';
-  reserveBtn.disabled=true;
+  messageEl.innerText = '予約を送信中...';
+  messageEl.className = '';
+  reserveBtn.disabled = true;
 
-  const form=new URLSearchParams();
-  form.append('name',reservationName);
-  form.append('menu',reservationMenu); 
-  form.append('date',reservationDate);
-  form.append('time',reservationTime);
+  const form = new URLSearchParams();
+  form.append('name', reservationName);
+  form.append('menu', reservationMenu); 
+  form.append('date', reservationDate);
+  form.append('time', reservationTime);
   form.append('userId', liffUserId || ''); 
 
-  fetch(GAS_URL,{
-    method:'POST',
-    headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+  fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
     body: form.toString()
   })
-  .then(res=>{if(!res.ok)throw new Error('Network response not ok'); return res.json();})
-  .then(data=>{
+  .then(res => {
+    if (!res.ok) throw new Error('Network response not ok');
+    return res.json();
+  })
+  .then(data => {
     console.log('[v0] 予約結果:', data);
-    if(data.success){
-      const formattedDate = reservationDate.replace(/-/g,'/');
+    if (data.success) {
+      const formattedDate = reservationDate.replace(/-/g, '/');
       modalDetails.innerHTML = `
-        <p>ご予約ありがとうございます、**${reservationName}**様。</p>
+        <p>ご予約ありがとうございます、<strong>${reservationName}</strong>様。</p>
         <p>予約内容をご確認ください。</p>
         <strong>🗓 日時: ${formattedDate} ${reservationTime}<br>
              ✨ メニュー: ${reservationMenu}</strong>
       `;
       modal.classList.add('active');
-      selectedSlot=null;
+      selectedSlot = null;
       menuOptions.forEach(cb => cb.checked = false);
       fetchReservations(selectedDate);
       updateButton();
     } else {
-      messageEl.innerText = data.message||"予約に失敗しました。満席の可能性があります。";
-      messageEl.className='error';
-      reserveBtn.disabled=false;
+      messageEl.innerText = data.message || "予約に失敗しました。満席の可能性があります。";
+      messageEl.className = 'error';
+      reserveBtn.disabled = false;
       fetchReservations(selectedDate); 
     }
   })
-  .catch(err=>{
+  .catch(err => {
     console.error('[v0] 予約送信エラー:', err);
-    messageEl.innerText="通信エラーが発生しました。接続を確認してください。";
-    messageEl.className='error';
-    reserveBtn.disabled=false;
+    messageEl.innerText = "通信エラーが発生しました。接続を確認してください。";
+    messageEl.className = 'error';
+    reserveBtn.disabled = false;
+    fetchReservations(selectedDate);
   });
 };
 
