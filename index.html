@@ -15,11 +15,11 @@
       --background-color: #E6E6EA; /* 明るいグレージュ */
       --card-background: #ffffff;
       --text-color: #333333;
-      --light-text-color: #6a6a6a; /* 変更 */
-      --border-color: #d8d8d8; /* 変更 */
-      --shadow-medium: 0 10px 30px rgba(0,0,0,0.1); /* 変更 */
-      --success-color: #4CAF50; /* 変更 */
-      --error-color: #EF5350; /* 変更 */
+      --light-text-color: #6a6a6a;
+      --border-color: #d8d8d8;
+      --shadow-medium: 0 10px 30px rgba(0,0,0,0.1);
+      --success-color: #4CAF50;
+      --error-color: #EF5350;
     }
 
     * { box-sizing: border-box; }
@@ -30,9 +30,8 @@
       padding: 20px;
       display: flex; justify-content: center; align-items: center; min-height: 100vh;
       color: var(--text-color);
-      flex-direction: column; /* hero-sectionのために追加 */
+      flex-direction: column;
     }
-    /* ヒーローセクションの追加 */
     .hero-section {
       position: relative;
       width: 100%;
@@ -44,7 +43,7 @@
     }
     .hero-image {
       width: 100%;
-      height: 250px; /* 必要に応じて調整 */
+      height: 250px;
       object-fit: cover;
       display: block;
     }
@@ -59,8 +58,8 @@
       text-align: center;
     }
     .hero-text h1 {
-      font-family: 'Playfair Display', serif; /* エレガントなフォント */
-      font-size: 36px; /* 大きく */
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
       margin: 0 0 10px;
       color: white;
       letter-spacing: 1px;
@@ -79,52 +78,46 @@
       max-width: 600px;
       width: 100%;
     }
-    /* 既存のh2を削除し、hero-text内のh1をメインタイトルとしたため、ここは不要 */
-    /* h2 { font-size: 32px; margin-top: 0; margin-bottom: 30px; color: var(--primary-color); text-align: center; } */
     
-    /* h3 のスタイル変更 */
     h3 {
-        font-size: 26px; /* 少し大きく */
-        margin-top: 40px; /* 上部の余白を増やす */
+        font-size: 26px;
+        margin-top: 40px;
         margin-bottom: 20px;
         color: var(--primary-color);
-        font-weight: 700; /* より強調 */
+        font-weight: 700;
         display: flex;
         align-items: center;
         position: relative;
-        padding-bottom: 10px; /* 下線とのスペース */
+        padding-bottom: 10px;
     }
     h3::before {
-        content: ''; /* 絵文字から線に変更 */
+        content: '';
         position: absolute;
         bottom: 0;
         left: 0;
-        width: 50px; /* 線の長さ */
-        height: 4px; /* 線の太さ */
-        background-color: var(--accent-color); /* アクセントカラーの線 */
+        width: 50px;
+        height: 4px;
+        background-color: var(--accent-color);
         border-radius: 2px;
     }
     label { display: block; margin-top: 20px; font-weight: 600; font-size: 18px; color: var(--light-text-color); margin-bottom: 5px; }
     input[type="text"], select {
       width: 100%; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color); margin-top: 5px; font-size: 18px;
-      box-shadow: inset 0 1px 4px rgba(0,0,0,0.08); transition: border-color 0.3s, box-shadow 0.3s; /* box-shadowのtransition追加 */
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.08); transition: border-color 0.3s, box-shadow 0.3s;
     }
+    /* 担当者セレクトボックスを削除したため、ここのスタイルは実質不要になるが、select要素自体は残る可能性があるため残しておく */
     select { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236a6a6a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 20px center; background-size: 14px; }
     input[type="text"]:focus, select:focus {
         border-color: var(--secondary-color);
-        box-shadow: 0 0 0 5px rgba(115, 149, 174, 0.2); /* フォーカス時のシャドウを調整 */
+        box-shadow: 0 0 0 5px rgba(115, 149, 174, 0.2);
         outline: none;
     }
 
-    /* メニュー選択のスタイル */
     .menu-group { border: 1px solid var(--border-color); border-radius: 12px; padding: 15px 20px; display: flex; flex-direction: column; gap: 12px; margin-top: 5px; background: var(--background-color); }
     .menu-group label { margin: 0; font-size: 16px; font-weight: 400; display: flex; align-items: center; color: var(--text-color); }
-    .menu-group input[type="checkbox"] { margin-right: 10px; transform: scale(1.3); cursor: pointer; accent-color: var(--secondary-color); /* チェックボックスの色 */ }
+    .menu-group input[type="checkbox"] { margin-right: 10px; transform: scale(1.3); cursor: pointer; accent-color: var(--secondary-color); }
 
-
-    /* --- 日付・時間選択グリッド --- */
     #dates, #slots { display: grid; gap: 15px; margin-top: 15px; }
-    /* PC/タブレットのレイアウト */
     #dates { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
     #slots { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
 
@@ -134,33 +127,31 @@
       font-size: 17px; font-weight: 500; transition: all 0.3s ease-in-out; background-color: var(--card-background);
       position: relative;
     }
-    /* ホバー時の効果を強化 */
     .date-btn:hover:not(.selected), .slot:hover:not(.selected):not(.booked) {
-        transform: translateY(-4px) scale(1.02); /* ホバー時の浮き上がりを強調し、少し拡大 */
+        transform: translateY(-4px) scale(1.02);
         border-color: var(--secondary-color);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.08); /* ホバー時にも影 */
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
     }
     .date-btn.selected, .slot.selected {
         background: var(--primary-color);
         color: #fff;
         border-color: var(--primary-color);
         transform: translateY(-2px);
-        box-shadow: 0 6px 18px rgba(0,0,0,0.15); /* 選択時にも影 */
+        box-shadow: 0 6px 18px rgba(0,0,0,0.15);
     }
 
-    /* 残席表示用のスタイル */
     .slot .remaining {
         font-size: 0.8em;
         font-weight: 700;
         margin-top: 3px;
-        color: var(--success-color); /* 残席があるときは緑 */
+        color: var(--success-color);
     }
     .date-btn .day-of-week { font-size: 0.9em; color: var(--light-text-color); margin-top: 5px; font-weight: 400; }
     
     .date-btn.selected .day-of-week { color: rgba(255, 255, 255, 0.8); }
     .slot.booked { background: #e9ecef; color: #999999; cursor: not-allowed; border-color: #d0d0d0; opacity: 0.8; }
     .slot.booked .remaining {
-        color: var(--error-color); /* 満席のときは赤 */
+        color: var(--error-color);
     }
     .slot.booked::after { 
         content: '満席'; 
@@ -172,31 +163,27 @@
         color: var(--error-color); 
     }
     .slot.booked .remaining {
-        visibility: hidden; /* 満席アイコンがあれば残席テキストは非表示 */
+        visibility: hidden;
     }
 
-
-    /* --- 予約ボタン --- */
     .primary {
       display: block; width: 100%; padding: 18px 20px; border-radius: 14px; border: none;
-      /* グラデーションボタン */
       background: linear-gradient(135deg, var(--accent-color) 0%, #a09187 100%);
-      color: #fff; margin-top: 45px; /* 上部の余白を増やす */
+      color: #fff; margin-top: 45px;
       font-size: 24px; font-weight: 700; cursor: pointer;
-      box-shadow: 0 10px 30px rgba(177, 162, 150, 0.5); /* グラデーションに合わせた影 */
+      box-shadow: 0 10px 30px rgba(177, 162, 150, 0.5);
       transition: all 0.3s ease;
       letter-spacing: 0.5px;
     }
     .primary:hover:not(:disabled) {
-        background: linear-gradient(135deg, #a09187 0%, var(--accent-color) 100%); /* ホバーでグラデーションの向きを反転 */
-        transform: translateY(-5px) scale(1.01); /* よりダイナミックなホバー効果 */
+        background: linear-gradient(135deg, #a09187 0%, var(--accent-color) 100%);
+        transform: translateY(-5px) scale(1.01);
         box-shadow: 0 15px 40px rgba(177, 162, 150, 0.6);
     }
     .primary:disabled { background: #bdbdbd; cursor: not-allowed; opacity: 0.6; box-shadow: none; }
     #message { margin-top: 25px; font-size: 18px; font-weight: 600; text-align: center; color: var(--error-color); }
     #message.error::before { content: '❌ '; font-size: 1.2em; margin-right: 5px; color: var(--error-color); }
 
-    /* --- モーダル --- */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6);
       display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px);
@@ -223,21 +210,16 @@
     #modalCloseBtn:hover { background: var(--primary-color); }
 
 
-    /* ====================================================== */
-    /* ★ モバイル向けレスポンシブデザイン調整 ★ */
-    /* ====================================================== */
     @media (max-width: 650px) {
       body { padding: 10px 0; min-height: 100vh; }
-      .hero-section { border-radius: 0; margin-bottom: 20px; } /* モバイルで角丸をなくす */
+      .hero-section { border-radius: 0; margin-bottom: 20px; }
       .hero-image { height: 180px; }
       .hero-text h1 { font-size: 28px; }
       .hero-text p { font-size: 16px; }
 
       .container { border-radius: 0; padding: 25px 15px; box-shadow: none; max-width: 100%; }
-      /* h2 はhero-sectionのh1に役割を移したので不要 */
-      /* h2 { font-size: 28px; margin-bottom: 20px; } */
-      h3 { font-size: 22px; margin-top: 30px; margin-bottom: 15px; padding-bottom: 8px; } /* 調整 */
-      h3::before { width: 40px; height: 3px; } /* 調整 */
+      h3 { font-size: 22px; margin-top: 30px; margin-bottom: 15px; padding-bottom: 8px; }
+      h3::before { width: 40px; height: 3px; }
       label { font-size: 16px; margin-top: 15px; }
       input[type="text"], select { padding: 14px 18px; font-size: 16px; border-radius: 10px; }
       .menu-group { padding: 10px 15px; gap: 8px; }
@@ -253,9 +235,7 @@
   </style>
 </head>
 <body>
-<!-- ヒーローセクションをフォームの上に追加 -->
 <div class="hero-section">
-  <!-- 画像のURLをplaceholderから実際の美容院の画像に変更してください -->
   <img src="https://via.placeholder.com/600x250/7395AE/FFFFFF?text=Welcome+to+Our+Salon" alt="美容院のイメージ写真" class="hero-image">
   <div class="hero-text">
     <h1>理想のスタイルを叶える予約フォーム</h1>
@@ -267,14 +247,15 @@
   <label for="name">お名前</label>
   <input id="name" type="text" placeholder="例: 山田太郎" autocomplete="name" />
 
-  <h3>担当者を選択してください (必須)</h3>
-  <select id="stylist">
-    <option value="">-- 選択してください --</option>
-    <option value="佐藤">佐藤（店長）</option>
-    <option value="田中">田中（トップスタイリスト）</option>
-    <option value="中村">中村（スタイリスト）</option>
-    <option value="指名なし">指名なし</option>
-  </select>
+  <!-- 担当者選択セクションを削除 -->
+  <!-- <h3>担当者を選択してください (必須)</h3> -->
+  <!-- <select id="stylist"> -->
+  <!--   <option value="">-- 選択してください --</option> -->
+  <!--   <option value="佐藤">佐藤（店長）</option> -->
+  <!--   <option value="田中">田中（トップスタイリスト）</option> -->
+  <!--   <option value="中村">中村（スタイリスト）</option> -->
+  <!--   <option value="指名なし">指名なし</option> -->
+  <!-- </select> -->
 
   <h3>ご希望のメニューを選択してください (必須)</h3>
   <div id="menuOptions" class="menu-group">
@@ -312,7 +293,7 @@ const MAX_CAPACITY = 3;
 // ★ LIFF IDを必ず書き換えてください
 const LIFF_ID = "2008012264-GAaEPJdZ"; 
 // ★ GASのデプロイURLを必ず書き換えてください
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwY7xlfNO8liMYoZ6bcQ1pNvVjC3wx24yLgF3UlVi-3BRU-YXUiFpg_TRmmcg16odLNZw/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwY7xlfNO8liMYoZ6bcQ1pNvVjC3wx24yLgF3UlVi-3BRU-YXUiFpg_TRmmcg16odNXZw/exec"; // GAS_URLも担当者削除に合わせて変更を推奨
 
 // ----------------- LIFF初期化 -----------------
 let liffUserId = null;
@@ -342,7 +323,7 @@ const slotsEl = document.getElementById('slots');
 const reserveBtn = document.getElementById('reserveBtn');
 const messageEl = document.getElementById('message');
 const nameEl = document.getElementById('name');
-const stylistEl = document.getElementById('stylist');
+// const stylistEl = document.getElementById('stylist'); // 担当者選択を削除
 const menuOptions = document.querySelectorAll('input[name="menu"]');
 const modal = document.getElementById('reservationModal');
 const modalDetails = document.getElementById('modalDetails');
@@ -463,28 +444,29 @@ function renderSlots(slotDetails, dateStr){
 // ボタン制御
 function updateButton(){ 
     const isNameValid = nameEl.value.trim().length > 0;
-    const isStylistSelected = stylistEl.value.trim().length > 0;
+    // const isStylistSelected = stylistEl.value.trim().length > 0; // 担当者選択を削除
     const isMenuSelected = Array.from(menuOptions).some(cb => cb.checked);
     const isDateTimeSelected = selectedDate && selectedSlot;
     
-    // 全てが有効な場合にのみボタンを有効化
-    reserveBtn.disabled = !(isNameValid && isStylistSelected && isMenuSelected && isDateTimeSelected); 
+    // 全てが有効な場合にのみボタンを有効化 (担当者選択の条件を削除)
+    reserveBtn.disabled = !(isNameValid && isMenuSelected && isDateTimeSelected); 
 }
 nameEl.addEventListener('input', updateButton);
-stylistEl.addEventListener('change', updateButton);
+// stylistEl.addEventListener('change', updateButton); // 担当者選択を削除
 menuOptions.forEach(cb => cb.addEventListener('change', updateButton));
 
 
 // 予約送信
 reserveBtn.onclick=()=>{
   const reservationName=nameEl.value.trim();
-  const reservationStylist=stylistEl.value;
+  // const reservationStylist=stylistEl.value; // 担当者選択を削除
   // 選択されたメニューの値をカンマ区切りで取得
   const reservationMenu = Array.from(menuOptions).filter(cb => cb.checked).map(cb => cb.value).join(', ');
   const reservationDate=selectedDate;
   const reservationTime=selectedSlot;
 
-  if(!reservationName || !reservationStylist || !reservationMenu || !reservationDate || !reservationTime){
+  // 担当者選択の必須チェックを削除
+  if(!reservationName || !reservationMenu || !reservationDate || !reservationTime){
     messageEl.innerText="すべての項目を選択・入力してください。";
     messageEl.className='error';
     return;
@@ -495,7 +477,7 @@ reserveBtn.onclick=()=>{
 
   const form=new URLSearchParams();
   form.append('name',reservationName);
-  form.append('stylist',reservationStylist); 
+  // form.append('stylist',reservationStylist); // 担当者情報を送信しない
   form.append('menu',reservationMenu); 
   form.append('date',reservationDate);
   form.append('time',reservationTime);
@@ -514,13 +496,12 @@ reserveBtn.onclick=()=>{
         <p>ご予約ありがとうございます、**${reservationName}**様。</p>
         <p>予約内容をご確認ください。</p>
         <strong>🗓 日時: ${formattedDate} ${reservationTime}<br>
-             💇 担当: ${reservationStylist}<br>
-             ✨ メニュー: ${reservationMenu}</strong>
+             ✨ メニュー: ${reservationMenu}</strong> <!-- 担当者表示を削除 -->
       `;
       modal.classList.add('active');
       // フォームをリセット 
       selectedSlot=null;
-      stylistEl.value = '';
+      // stylistEl.value = ''; // 担当者選択を削除
       menuOptions.forEach(cb => cb.checked = false);
       fetchReservations(selectedDate); // 予約状況を更新
       updateButton();
