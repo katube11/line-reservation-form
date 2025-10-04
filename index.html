@@ -523,6 +523,40 @@
 
 
     /* ====================================================== */
+    /* ★ PC向けレイアウト調整 ★ */
+    /* ====================================================== */
+    @media (min-width: 993px) { /* PCサイズ以上 */
+        body {
+            flex-direction: row; /* 横並びにする */
+            justify-content: center;
+        }
+        .booking-wrapper {
+            display: flex; /* Flexboxを適用 */
+            flex-direction: row-reverse; /* 履歴を左、フォームを右にする */
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+            width: 100%;
+            max-width: 1400px;
+            flex-wrap: nowrap; /* PCでは折り返さない */
+        }
+
+        .main-form-container {
+            flex: 3; /* 予約フォームを右に大きく */
+            min-width: 600px;
+            max-width: 800px;
+        }
+
+        #history-container {
+            flex: 2; /* 履歴を左に小さく */
+            min-width: 380px;
+            max-width: 500px;
+            margin-top: 0 !important;
+        }
+    }
+
+
+    /* ====================================================== */
     /* ★ モバイル向けレスポンシブデザイン調整 ★ */
     /* ====================================================== */
     @media (max-width: 992px) { /* PCとモバイルの中間ブレークポイントを調整 */
