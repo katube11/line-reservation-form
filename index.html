@@ -2,104 +2,56 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>LINE予約フォーム</title>
+<title>予約フォーム</title>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<style>
-body { font-family: sans-serif; padding: 20px; }
-input, select, button { margin: 5px 0; padding: 5px; width: 200px; }
-</style>
 </head>
 <body>
-
 <h1>予約フォーム</h1>
 
-<div id="userInfo"></div>
+<input type="text" id="name" placeholder="名前">
+<input type="date" id="date">
+<input type="time" id="time">
+<input type="text" id="menu" placeholder="メニュー">
 
-<label>予約日:</label>
-<input type="date" id="reservationDate"><br>
-
-<label>予約時間:</label>
-<select id="reservationTime">
-  <option value="09:00">09:00</option>
-  <option value="09:30">09:30</option>
-  <option value="10:00">10:00</option>
-  <option value="10:30">10:30</option>
-  <option value="11:00">11:00</option>
-  <option value="11:30">11:30</option>
-  <option value="12:00">12:00</option>
-  <option value="12:30">12:30</option>
-  <option value="13:00">13:00</option>
-  <option value="13:30">13:30</option>
-  <option value="14:00">14:00</option>
-  <option value="14:30">14:30</option>
-  <option value="15:00">15:00</option>
-  <option value="15:30">15:30</option>
-  <option value="16:00">16:00</option>
-  <option value="16:30">16:30</option>
-  <option value="17:00">17:00</option>
-</select><br>
-
-<label>メニュー:</label>
-<select id="reservationMenu">
-  <option value="カット (60分)">カット (60分)</option>
-  <option value="カラー (90分)">カラー (90分)</option>
-  <option value="パーマ (120分)">パーマ (120分)</option>
-  <option value="トリートメント (30分)">トリートメント (30分)</option>
-</select><br>
-
-<button id="reserveBtn">予約する</button>
-
-<div id="status"></div>
+<button id="reserveBtn">予約送信</button>
 
 <script>
-let userId = "";
-let userName = "";
+const liffId = "2008012264-GAaEPJdZ"; // ここにLIFF ID
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyBU16vHa-DkxJuaYDRE9iubBaF0M5o_62FOUtaDfOiYyvqHPDwjSguMI2P7BcaJUw_Yw/exec"; // ここにGASのデプロイURL
 
-async function initLiff() {
-    await liff.init({ liffId: "2008012264-GAaEPJdZ" });
-    if (!liff.isLoggedIn()) {
-        liff.login();
-    } else {
-        const profile = await liff.getProfile();
-        userId = profile.userId;
-        userName = profile.displayName;
-        document.getElementById("userInfo").innerText = `ログイン中: ${userName}`;
-    }
-}
+async function main() {
+  await liff.init({ liffId });
 
-// 予約送信
-async function sendReservation() {
-    const date = document.getElementById("reservationDate").value;
-    const time = document.getElementById("reservationTime").value;
-    const menu = document.getElementById("reservationMenu").value;
-
-    const data = {
-        reservationDate: date,
-        reservationTime: time,
-        reservationMenu: menu,
-        userId: userId,
-        userName: userName
-    };
-
+  const btn = document.getElementById("reserveBtn");
+  btn.onclick = async () => {
     try {
-        const response = await fetch("https://script.google.com/macros/s/AKfycbzO9le7PB8DcJ0PfCuIGbD5sCowc9Cid0RxTpDlfyjsfvwOk_pwnfAehpnE2TvbNBYh/exec", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        });
-        const result = await response.text();
-        document.getElementById("status").innerText = "予約完了しました！";
-        console.log(result);
+      const userId = liff.getContext().userId || "";
+      const res = await fetch(GAS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userName: document.getElementById("name").value,
+          reservationDate: document.getElementById("date").value,
+          reservationTime: document.getElementById("time").value,
+          reservationMenu: document.getElementById("menu").value,
+          userId
+        })
+      });
+
+      const data = await res.json();
+      if (data.status === "success") {
+        alert("予約が完了しました！");
+      } else {
+        alert("エラー: " + data.message);
+      }
     } catch (err) {
-        console.error(err);
-        document.getElementById("status").innerText = "予約送信に失敗しました";
+      console.error(err);
+      alert("送信エラー");
     }
+  };
 }
 
-document.getElementById("reserveBtn").addEventListener("click", sendReservation);
-
-initLiff();
+main();
 </script>
-
 </body>
 </html>
