@@ -4,23 +4,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>[店舗名] 予約フォーム</title> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>
-    /* ========== デザインテーマ: モダン＆クリーンな美容室向け ========== */
+   <style>
+    /* ========== デザインテーマ: モダン＆クリーンな美容室向け (改善版) ========== */
     :root {
       /* カラーパレットの調整 */
-      --primary-color: #3C7A7C; /* 落ち着いたダークグリーン/シアン系 */
-      --secondary-color: #6D9773; /* アクセントグリーン */
-      --accent-color: #D4AF37; /* ゴールド/真鍮のようなアクセントカラー */
+      --primary-color: #5A8C8E; /* 落ち着いたミントグリーン系 */
+      --secondary-color: #8EBABF; /* 明るめのミントグリーン */
+      --accent-color: #DAA520; /* ゴールド/真鍮のようなアクセントカラー (Gold) */
       
-      --background-color: #f8f8f8; /* 背景を明るいグレーに */
+      --background-color: #f0f4f8; /* 背景を非常に明るいブルーグレーに */
       --card-background: #ffffff;
       --text-color: #333333;
-      --light-text-color: #777777;
-      --border-color: #e0e0e0;
-      --shadow-soft: 0 4px 10px rgba(0,0,0,0.05);
-      --shadow-medium: 0 8px 25px rgba(0,0,0,0.12);
-      --success-color: #28a745;
-      --error-color: #dc3545;
+      --light-text-color: #6a6a6a;
+      --border-color: #cfd8dc; /* ボーダーをより自然な色に */
+      --shadow-soft: 0 5px 15px rgba(0,0,0,0.08);
+      --shadow-medium: 0 10px 30px rgba(0,0,0,0.15);
+      --success-color: #4CAF50; /* 緑系の成功色 */
+      --error-color: #EF5350; /* 赤系のエラー色 */
+      --warning-color: #FFC107; /* 警告色 */
+
+      /* フォントサイズ調整 */
+      --font-size-base: 16px;
+      --font-size-large: 20px;
+      --font-size-xl: 24px;
+      --font-size-xxl: 32px;
     }
 
     * { box-sizing: border-box; }
@@ -29,184 +36,491 @@
       background: var(--background-color);
       margin: 0;
       padding: 20px;
-      display: flex; justify-content: center; align-items: center; min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start; /* 上寄せに調整 */
+      min-height: 100vh;
       color: var(--text-color);
       flex-direction: column;
     }
     .container {
       background: var(--card-background);
-      border-radius: 20px;
+      border-radius: 24px; /* 角をより丸く */
       box-shadow: var(--shadow-medium);
       padding: 40px;
-      max-width: 600px;
+      max-width: 650px; /* 少し幅を広げる */
       width: 100%;
-      margin-bottom: 20px; /* 履歴との間にスペース */
+      margin-bottom: 30px; /* 履歴との間にスペース */
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-    h2 { font-size: 32px; margin-top: 0; margin-bottom: 30px; color: var(--primary-color); text-align: center; font-weight: 700; }
-    h3 { 
-        font-size: 22px; 
-        margin-top: 35px; 
-        margin-bottom: 18px; 
+    .container:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.18);
+    }
+
+    h2 { 
+        font-size: var(--font-size-xxl); 
+        margin-top: 0; 
+        margin-bottom: 35px; /* マージンを増やす */
         color: var(--primary-color); 
+        text-align: center; 
+        font-weight: 700; 
+        position: relative;
+        padding-bottom: 15px; /* 下線のためにパディング */
+    }
+    h2 span {
+        display: inline-block;
+        margin-right: 10px;
+        vertical-align: middle;
+        color: var(--accent-color);
+    }
+    h2::after {
+        content: '';
+        display: block;
+        width: 60px;
+        height: 4px;
+        background: var(--accent-color);
+        margin: 15px auto 0;
+        border-radius: 2px;
+    }
+
+    h3 { 
+        font-size: var(--font-size-xl); 
+        margin-top: 40px; 
+        margin-bottom: 20px; 
+        color: var(--text-color); /* タイトルの色をテキスト色に寄せる */
         font-weight: 600; 
-        border-left: 5px solid var(--accent-color); 
-        padding-left: 15px;
-        line-height: 1.5;
+        border-left: 6px solid var(--primary-color); /* アクセントカラーからプライマリーカラーに */
+        padding-left: 18px;
+        line-height: 1.4;
+        position: relative;
     }
-    label { display: block; margin-top: 20px; font-weight: 600; font-size: 18px; color: var(--light-text-color); margin-bottom: 5px; }
+    h3::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 12px;
+        height: 12px;
+        background: var(--accent-color);
+        border-radius: 50%;
+        border: 2px solid var(--primary-color);
+        z-index: 1;
+    }
+
+    label { 
+        display: block; 
+        margin-top: 25px; 
+        font-weight: 600; 
+        font-size: var(--font-size-base); 
+        color: var(--light-text-color); 
+        margin-bottom: 8px; /* マージンを増やす */
+    }
     input[type="text"] {
-      width: 100%; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color); margin-top: 5px; font-size: 18px;
-      box-shadow: inset 0 1px 4px rgba(0,0,0,0.08); transition: border-color 0.3s;
+      width: 100%; 
+      padding: 16px 20px; 
+      border-radius: 12px; 
+      border: 1px solid var(--border-color); 
+      margin-top: 5px; 
+      font-size: var(--font-size-large);
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); 
+      transition: border-color 0.3s, box-shadow 0.3s;
+      color: var(--text-color);
+      background-color: var(--background-color); /* 入力フィールドの背景色 */
     }
-    input[type="text"]:focus { border-color: var(--secondary-color); box-shadow: 0 0 0 4px rgba(109, 151, 115, 0.25); outline: none; }
+    input[type="text"]:focus { 
+        border-color: var(--primary-color); 
+        box-shadow: 0 0 0 4px rgba(90, 140, 142, 0.2); /* プライマリーカラーのシャドウ */
+        outline: none; 
+        background-color: #ffffff;
+    }
 
     /* --- 日付・時間選択グリッド --- */
-    #dates, #slots { display: grid; gap: 12px; margin-top: 15px; }
-    #dates { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
-    #slots { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+    #dates, #slots { display: grid; gap: 15px; margin-top: 20px; } /* ギャップを増やす */
+    #dates { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); } /* 幅を広げる */
+    #slots { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); } /* 幅を広げる */
 
     .date-btn, .slot {
-      display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 10px; border-radius: 14px;
-      border: 1px solid var(--border-color); cursor: pointer; box-shadow: var(--shadow-soft); text-align: center;
-      font-size: 17px; font-weight: 500; transition: all 0.2s ease-in-out; background-color: var(--card-background);
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 18px 10px; /* パディングを増やす */
+      border-radius: 16px; /* 角を丸く */
+      border: 1px solid var(--border-color); 
+      cursor: pointer; 
+      box-shadow: var(--shadow-soft); 
+      text-align: center;
+      font-size: var(--font-size-large); 
+      font-weight: 500; 
+      transition: all 0.3s ease-in-out; 
+      background-color: var(--card-background);
       position: relative;
+      color: var(--text-color);
     }
-    .date-btn .day-of-week { font-size: 0.9em; color: var(--light-text-color); margin-top: 3px; font-weight: 400; }
+    .date-btn .day-of-week { font-size: 0.85em; color: var(--light-text-color); margin-top: 5px; font-weight: 400; } /* マージンを増やす */
     .date-btn:hover:not(.selected), .slot:hover:not(.selected):not(.booked) { 
-        transform: translateY(-2px); 
+        transform: translateY(-4px); /* 大きく浮き上がらせる */
         border-color: var(--secondary-color); 
-        box-shadow: 0 6px 15px rgba(0,0,0,0.1); 
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1); /* シャドウを強める */
+        color: var(--primary-color);
     }
     .date-btn.selected, .slot.selected { 
         background: var(--primary-color); 
         color: #fff; 
         border-color: var(--primary-color); 
-        transform: scale(0.98); 
-        box-shadow: var(--shadow-soft);
+        transform: scale(1.02); /* 少し大きくする */
+        box-shadow: 0 5px 15px rgba(90, 140, 142, 0.4); /* プライマリーカラーのシャドウ */
+        z-index: 2; /* 最前面に */
     }
-    .date-btn.selected .day-of-week { color: rgba(255, 255, 255, 0.8); }
+    .date-btn.selected .day-of-week { color: rgba(255, 255, 255, 0.85); }
     
     /* 満席（booked）スタイル */
-    .slot.booked { background: #eeeeee; color: #aaaaaa; cursor: not-allowed; border-color: #cccccc; opacity: 0.8; }
-    .slot.booked::after { content: '満席'; position: absolute; bottom: 5px; right: 5px; font-size: 0.7em; font-weight: 600; color: #888; }
+    .slot.booked { 
+        background: #e0e0e0; 
+        color: #9e9e9e; 
+        cursor: not-allowed; 
+        border-color: #c0c0c0; 
+        opacity: 0.9; 
+        box-shadow: none;
+        transform: none;
+    }
+    .slot.booked::after { 
+        content: '満席'; 
+        position: absolute; 
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 0.9em; 
+        font-weight: 600; 
+        color: #757575; 
+        background-color: rgba(255, 255, 255, 0.7);
+        padding: 4px 8px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        white-space: nowrap; /* 満席が改行されないように */
+    }
+    /* 満席のスロットにホバーしても変化させない */
+    .slot.booked:hover {
+        transform: none;
+        border-color: #c0c0c0;
+        box-shadow: none;
+        color: #9e9e9e;
+    }
     
     /* 予約数表示のスタイル */
-    .slot span { display: block; font-size: 0.9em; font-weight: 400; margin-top: 2px; color: var(--light-text-color); }
-    .slot.selected span { color: rgba(255, 255, 255, 0.8); }
+    .slot span { display: block; font-size: 0.8em; font-weight: 400; margin-top: 4px; color: var(--light-text-color); } /* マージンとフォントサイズ調整 */
+    .slot.selected span { color: rgba(255, 255, 255, 0.85); }
 
 
     /* --- 予約ボタン --- */
     .primary {
-      display: block; width: 100%; padding: 18px 20px; border-radius: 14px; border: none; background: var(--accent-color);
+      display: block; 
+      width: 100%; 
+      padding: 20px 25px; /* パディングを増やす */
+      border-radius: 16px; /* 角を丸く */
+      border: none; 
+      background: var(--accent-color);
       color: #333; /* ボタンの文字色を濃い色にして視認性アップ */
-      margin-top: 40px; font-size: 24px; font-weight: 700; cursor: pointer; 
-      box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+      margin-top: 50px; 
+      font-size: var(--font-size-xl); 
+      font-weight: 700; 
+      cursor: pointer; 
+      box-shadow: 0 10px 30px rgba(218, 165, 32, 0.4); /* アクセントカラーのシャドウ */
       transition: all 0.3s ease;
+      letter-spacing: 1px; /* 文字間を少し開ける */
     }
-    .primary:hover:not(:disabled) { background: #C49F30; transform: translateY(-3px); }
-    .primary:disabled { background: #bdbdbd; color: #f8f8f8; cursor: not-allowed; opacity: 0.7; }
-    #message { margin-top: 25px; font-size: 18px; font-weight: 600; text-align: center; color: var(--error-color); }
-    #message.error::before { content: '❌ '; font-size: 1.2em; margin-right: 5px; color: var(--error-color); }
+    .primary:hover:not(:disabled) { 
+        background: #C79420; /* ホバーで少し暗く */
+        transform: translateY(-5px) scale(1.01); /* 大きく浮き上がらせる */
+        box-shadow: 0 15px 40px rgba(218, 165, 32, 0.5); /* シャドウを強める */
+    }
+    .primary:disabled { 
+        background: #bdbdbd; 
+        color: #f0f0f0; /* 色を統一 */
+        cursor: not-allowed; 
+        opacity: 0.7; 
+        box-shadow: none;
+        transform: none;
+    }
+    #message { 
+        margin-top: 30px; 
+        font-size: var(--font-size-base); 
+        font-weight: 600; 
+        text-align: center; 
+        color: var(--error-color); 
+        padding: 10px;
+        border-radius: 8px;
+        background-color: rgba(239, 83, 80, 0.1); /* エラーメッセージの背景 */
+        border: 1px solid var(--error-color);
+        display: none; /* 初期は非表示 */
+    }
+    #message.error {
+        display: block; /* エラー時のみ表示 */
+    }
+    #message.error::before { content: '🚨 '; font-size: 1em; margin-right: 5px; color: var(--error-color); }
+    #message.loading {
+        display: block;
+        color: var(--primary-color);
+        background-color: rgba(90, 140, 142, 0.1);
+        border-color: var(--primary-color);
+    }
+    #message.loading::before { content: '⏳ '; font-size: 1em; margin-right: 5px; color: var(--primary-color); }
+
 
     /* --- モーダル --- (デザイン変更なし) */
     .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6);
-      display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px);
-      opacity: 0; transition: opacity 0.3s ease-in-out;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.65); /* 背景を濃く */
+      display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(6px); /* ぼかしを強く */
+      opacity: 0; transition: opacity 0.4s ease-in-out;
     }
     .modal-overlay.active { display: flex; opacity: 1; }
     .modal-content {
-      background: var(--card-background); padding: 40px; border-radius: 16px; max-width: 450px; width: 90%;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); text-align: center; transform: scale(0.8); opacity: 0;
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      background: var(--card-background); 
+      padding: 40px; 
+      border-radius: 20px; /* 角を丸く */
+      max-width: 480px; 
+      width: 90%;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4); /* シャドウを強める */
+      text-align: center; 
+      transform: scale(0.7); opacity: 0; /* 小さくしてフェードイン */
+      transition: all 0.4s cubic-bezier(0.34, 1.6, 0.64, 1); /* バウンドするようなアニメーション */
+      color: var(--text-color);
     }
     .modal-overlay.active .modal-content { transform: scale(1); opacity: 1; }
-    .modal-icon { font-size: 4em; color: var(--success-color); margin-bottom: 15px; }
-    .modal-content h4 { font-size: 28px; color: var(--primary-color); margin-top: 0; margin-bottom: 20px; font-weight: 700; }
+    .modal-icon { font-size: 4.5em; color: var(--success-color); margin-bottom: 20px; text-shadow: 0 3px 10px rgba(76, 175, 80, 0.3); }
+    .modal-content h4 { font-size: var(--font-size-xxl); color: var(--primary-color); margin-top: 0; margin-bottom: 25px; font-weight: 700; line-height: 1.3; }
     .modal-details {
-      background: var(--background-color); padding: 15px; border-radius: 10px; margin-bottom: 25px;
-      font-size: 17px; font-weight: 500; line-height: 1.8;
+      background: var(--background-color); 
+      padding: 20px; /* パディングを増やす */
+      border-radius: 12px; /* 角を丸く */
+      margin-bottom: 30px; /* マージンを増やす */
+      font-size: var(--font-size-base); 
+      font-weight: 500; 
+      line-height: 1.8;
+      text-align: left;
     }
-    .modal-details strong { color: var(--accent-color); font-weight: 700; font-size: 1.1em; display: block; margin-top: 5px; }
+    .modal-details strong { color: var(--primary-color); font-weight: 700; font-size: 1.15em; display: block; margin-top: 8px; } /* アクセントカラーからプライマリーカラーに */
+    .modal-details p { margin-bottom: 10px; }
+
     #modalCloseBtn {
-      background: var(--secondary-color); color: white; border: none; padding: 12px 25px; border-radius: 10px;
-      font-size: 18px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+      background: var(--primary-color); 
+      color: white; 
+      border: none; 
+      padding: 15px 30px; /* パディングを増やす */
+      border-radius: 12px; 
+      font-size: var(--font-size-large); 
+      font-weight: 600; 
+      cursor: pointer; 
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 5px 15px rgba(90, 140, 142, 0.3);
     }
-    #modalCloseBtn:hover { background: var(--primary-color); }
+    #modalCloseBtn:hover { 
+        background: var(--secondary-color); 
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(90, 140, 142, 0.4);
+    }
 
     /* --- 履歴表示スタイル --- */
+    #history-container {
+        margin-top: 40px; /* 上部のマージンを増やす */
+        padding: 30px 40px; /* 左右のパディングを増やす */
+        box-shadow: var(--shadow-soft); /* シャドウを調整 */
+    }
+
     .history-item {
       background: var(--card-background);
-      border-radius: 12px;
-      padding: 15px;
-      margin-bottom: 12px;
-      /* 左のボーダーをアクセントカラーに変更 */
-      border-left: 5px solid var(--accent-color); 
-      box-shadow: var(--shadow-soft);
+      border-radius: 16px; /* 角を丸く */
+      padding: 20px 25px; /* パディングを増やす */
+      margin-bottom: 15px; /* マージンを増やす */
+      border-left: 6px solid var(--accent-color); /* 左のボーダーを太く */
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08); /* シャドウを調整 */
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .history-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+    }
+    .history-item-main {
+        display: flex;
+        align-items: baseline;
     }
     .history-item-date {
-      font-size: 20px;
+      font-size: var(--font-size-large);
       font-weight: 700;
       color: var(--primary-color);
+      letter-spacing: 0.5px;
     }
     .history-item-time {
-      font-size: 18px;
-      font-weight: 500;
+      font-size: var(--font-size-base);
+      font-weight: 600;
       color: var(--accent-color);
       margin-left: 15px;
+      padding: 5px 10px;
+      background-color: rgba(218, 165, 32, 0.1); /* アクセントカラーの薄い背景 */
+      border-radius: 8px;
     }
     .history-item-info {
-      font-size: 14px;
+      font-size: 15px;
       color: var(--light-text-color);
       text-align: right;
+    }
+    .history-item-info strong {
+        color: var(--text-color);
+        font-weight: 600;
+    }
+    .history-item-info span {
+        font-size: 0.85em;
+        color: var(--light-text-color);
+        display: block;
+        margin-top: 3px;
+    }
+    #history p { /* 履歴なしの場合のメッセージ */
+        text-align: center;
+        color: var(--light-text-color);
+        padding: 20px;
+        background-color: var(--background-color);
+        border-radius: 12px;
+        margin-top: 20px;
     }
 
 
     /* ====================================================== */
     /* ★ モバイル向けレスポンシブデザイン調整 ★ */
     /* ====================================================== */
-    @media (max-width: 650px) {
+    @media (max-width: 768px) { /* ブレークポイントを少し上げる */
       body {
-        padding: 10px 0;
-        min-height: 100vh;
+        padding: 10px;
+        align-items: center; /* 中央寄せに調整 */
       }
       .container {
         border-radius: 0;
-        padding: 25px 15px;
+        padding: 25px 20px; /* パディングを調整 */
         box-shadow: none;
         max-width: 100%;
+        margin-bottom: 20px;
       }
+      .container:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      h2 { 
+          font-size: var(--font-size-xl); 
+          margin-bottom: 25px;
+          padding-bottom: 10px;
+      }
+      h2::after {
+          margin-top: 10px;
+      }
+      h3 { 
+          font-size: var(--font-size-large); 
+          margin-top: 30px; 
+          margin-bottom: 15px; 
+          padding-left: 15px;
+          border-left-width: 4px;
+      }
+      h3::before {
+        width: 10px;
+        height: 10px;
+      }
+
+      label { 
+          margin-top: 20px; 
+          font-size: var(--font-size-base); 
+          margin-bottom: 5px;
+      }
+      input[type="text"] {
+        padding: 14px 18px;
+        font-size: var(--font-size-base);
+      }
+
       /* 日付・時間選択グリッドの調整 */
       #dates {
-        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* モバイルでさらに小さく */
         gap: 10px;
       }
       #slots {
-        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); /* モバイルでさらに小さく */
         gap: 10px;
       }
       .date-btn, .slot {
-        padding: 14px 8px;
-        font-size: 16px;
+        padding: 15px 8px;
+        font-size: var(--font-size-base);
+        border-radius: 12px;
       }
+      .date-btn .day-of-week { margin-top: 3px; }
+      .slot span { font-size: 0.75em; margin-top: 2px; }
+      .slot.booked::after {
+          font-size: 0.8em;
+          padding: 3px 6px;
+          border-radius: 6px;
+      }
+
+      .primary {
+        padding: 16px 20px;
+        font-size: var(--font-size-large);
+        margin-top: 35px;
+        border-radius: 12px;
+      }
+      #message { margin-top: 20px; font-size: 15px; }
+
+
+      .modal-content {
+          padding: 30px;
+          border-radius: 16px;
+      }
+      .modal-icon { font-size: 3.5em; margin-bottom: 15px; }
+      .modal-content h4 { font-size: var(--font-size-xl); margin-bottom: 20px; }
+      .modal-details {
+          padding: 15px;
+          margin-bottom: 20px;
+          font-size: 15px;
+      }
+      .modal-details strong { font-size: 1.05em; margin-top: 5px; }
+      #modalCloseBtn {
+        padding: 12px 25px;
+        font-size: var(--font-size-base);
+        border-radius: 10px;
+      }
+
       /* 履歴アイテムのモバイル対応 */
+      #history-container {
+        margin-top: 25px;
+        padding: 25px 20px;
+      }
       .history-item {
         flex-direction: column;
         align-items: flex-start;
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        border-left-width: 4px;
+      }
+      .history-item-main {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
       }
       .history-item-time {
         margin-left: 0;
         margin-top: 5px;
+        font-size: 16px;
       }
       .history-item-info {
         width: 100%;
-        margin-top: 10px;
-        padding-top: 5px;
+        margin-top: 15px;
+        padding-top: 10px;
         border-top: 1px solid var(--border-color);
         text-align: left;
+        font-size: 14px;
+      }
+      .history-item-info span {
+          margin-top: 5px;
       }
     }
   </style>
