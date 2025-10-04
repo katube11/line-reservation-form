@@ -29,9 +29,12 @@
       background: var(--background-color);
       margin: 0;
       padding: 20px;
-      display: flex; justify-content: center; align-items: center; min-height: 100vh;
+      display: flex; 
+      justify-content: center; 
+      align-items: flex-start; /* 上端から開始 */
+      min-height: 100vh;
       color: var(--text-color);
-      flex-direction: column;
+      flex-direction: column; /* スマートフォンでの縦並びを維持 */
     }
     .container {
       background: var(--card-background);
@@ -42,6 +45,22 @@
       width: 100%;
       margin-bottom: 20px; /* 履歴との間にスペース */
     }
+    
+    /* 履歴コンテナのスタイル調整 */
+    #history-container {
+      /* 最大幅を広げ、予約フォームと同じように表示 */
+      max-width: 600px; 
+      /* スクロールなしで全表示するために max-height や height を削除 */
+      overflow: visible; 
+      padding: 30px 40px; /* フォームと同じパディングにする */
+    }
+
+    /* 履歴リスト自体もスクロールしないように設定を削除 */
+    #history {
+        overflow: visible;
+    }
+
+    /* 以下は予約フォーム本体のスタイル（前回の改善版から変更なし） */
     h2 { font-size: 32px; margin-top: 0; margin-bottom: 30px; color: var(--primary-color); text-align: center; font-weight: 700; }
     h3 { 
         font-size: 22px; 
@@ -179,6 +198,9 @@
         box-shadow: none;
         max-width: 100%;
       }
+      #history-container {
+        padding: 25px 15px; /* モバイルではパディングを調整 */
+      }
       /* 日付・時間選択グリッドの調整 */
       #dates {
         grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
@@ -227,7 +249,7 @@
   <div id="message"></div>
 </div>
 
-<div class="container" id="history-container" style="margin-top: 30px; padding: 30px; display: none;">
+<div class="container" id="history-container" style="margin-top: 30px; display: none;">
   <h3>👤 自分の予約履歴</h3>
   <div id="history">
     <p style="text-align:center;color:var(--light-text-color)">LINE連携が完了すると履歴が表示されます。</p>
@@ -298,7 +320,8 @@ initializeLiff();
 // ----------------- UI/イベント処理 -----------------
 modalCloseBtn.onclick = () => {
     modal.classList.remove('active');
-    if (liff.isInClient()) liff.closeWindow();
+    // LIFFで表示されている場合、モーダル閉じと同時にウィンドウを閉じる
+    if (liff.isInClient()) liff.closeWindow(); 
 };
 modal.onclick = (e) => {
     if (e.target === modal) modal.classList.remove('active');
