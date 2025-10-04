@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    /* ========== デザインテーマ: エレガント＆ラグジュアリーな美容室向け ========== */
+    /* ========== デザインテーマ: エレガント＆ラグジュアリーな美容室向け (PCレイアウト変更版) ========== */
     :root {
       /* カラーパレット */
       --primary-color: #7a6e60; /* 温かみのあるグレージュ */
@@ -40,14 +40,26 @@
       font-family: 'Noto Sans JP', sans-serif;
       background: var(--background-color);
       margin: 0;
-      padding: 30px 20px;
+      padding: 30px; /* 全体のパディングを調整 */
       display: flex;
-      flex-direction: column;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start; /* 上寄せに調整 */
       min-height: 100vh;
       color: var(--text-color);
       line-height: 1.6;
+      gap: 30px; /* コンテナ間の隙間 */
+      flex-wrap: wrap; /* 画面幅が狭くなったら折り返す */
+    }
+
+    /* 全体を囲むコンテナの調整 */
+    .booking-wrapper {
+        display: flex;
+        gap: 30px;
+        width: 100%; /* 親要素の幅いっぱいに */
+        max-width: 1400px; /* 全体的な最大幅 */
+        justify-content: center;
+        align-items: flex-start;
+        flex-wrap: wrap; /* PCでもタブレット幅で折り返す */
     }
 
     /* コンテナ */
@@ -56,9 +68,8 @@
       border-radius: 16px;
       box-shadow: var(--shadow-medium);
       padding: 45px 50px;
-      max-width: 720px;
-      width: 100%;
-      margin-bottom: 30px;
+      width: 100%; /* Flexアイテムとして幅を調整 */
+      margin-bottom: 0; /* body側のgapで調整するため */
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       position: relative;
     }
@@ -77,6 +88,36 @@
         border-top-left-radius: 16px;
         border-top-right-radius: 16px;
     }
+
+    /* メインの予約フォームコンテナ */
+    .main-form-container {
+        flex: 3; /* 予約フォームを大きく */
+        min-width: 600px; /* 最小幅を確保 */
+        max-width: 800px; /* 最大幅を設定 */
+    }
+
+    /* 履歴表示コンテナ */
+    #history-container {
+        flex: 2; /* 履歴を小さく */
+        min-width: 380px; /* 最小幅を確保 */
+        max-width: 500px; /* 最大幅を設定 */
+        margin-top: 0 !important; /* スタイル上書き */
+        padding: 40px 50px; /* 他のコンテナとパディングを合わせる */
+    }
+    #history-container h3 {
+        color: var(--primary-color);
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 15px;
+        margin-bottom: 30px;
+    }
+    #history-container h3 i {
+        color: var(--accent-color);
+    }
+    /* 履歴コンテナを常に表示 */
+    #history-container {
+        display: block !important;
+    }
+
 
     /* タイトル */
     h2 { 
@@ -402,21 +443,7 @@
         box-shadow: 0 9px 24px rgba(122, 110, 96, 0.45);
     }
 
-    /* 履歴表示スタイル */
-    #history-container {
-        margin-top: 40px;
-        padding: 40px 50px;
-    }
-    #history-container h3 {
-        color: var(--primary-color);
-        border-bottom: 1px solid var(--border-color);
-        padding-bottom: 15px;
-        margin-bottom: 30px;
-    }
-    #history-container h3 i {
-        color: var(--accent-color);
-    }
-
+    /* 履歴アイテムのスタイル */
     .history-item {
       background: var(--card-background);
       border-radius: 14px;
@@ -498,7 +525,23 @@
     /* ====================================================== */
     /* ★ モバイル向けレスポンシブデザイン調整 ★ */
     /* ====================================================== */
-    @media (max-width: 768px) {
+    @media (max-width: 992px) { /* PCとモバイルの中間ブレークポイントを調整 */
+        .booking-wrapper {
+            flex-direction: column; /* 縦並びにする */
+            align-items: center; /* 中央寄せ */
+        }
+        .main-form-container,
+        #history-container {
+            min-width: unset; /* 最小幅をリセット */
+            max-width: 720px; /* PCレイアウト時の最大幅を維持（または調整） */
+            margin-bottom: 20px; /* 各コンテナの下に余白 */
+        }
+        #history-container {
+            margin-top: 20px !important; /* 上の余白を調整 */
+        }
+    }
+
+    @media (max-width: 768px) { /* スマートフォン向けの調整 */
       body {
         padding: 15px;
       }
