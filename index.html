@@ -82,7 +82,7 @@
     #message { margin-top: 25px; font-size: 18px; font-weight: 600; text-align: center; color: var(--error-color); }
     #message.error::before { content: '❌ '; font-size: 1.2em; margin-right: 5px; color: var(--error-color); }
 
-    /* --- モーダル --- (省略) */
+    /* --- モーダル --- */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6);
       display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px);
@@ -108,7 +108,7 @@
     }
     #modalCloseBtn:hover { background: var(--primary-color); }
 
-    /* --- 履歴表示スタイル --- (省略) */
+    /* --- 履歴表示スタイル --- */
     .history-item {
       background: var(--card-background);
       border-radius: 12px;
@@ -120,6 +120,8 @@
       justify-content: space-between;
       align-items: center;
     }
+    .history-info-left { display: flex; align-items: center; }
+    .history-info-right { text-align: right; }
     .history-item-date {
       font-size: 20px;
       font-weight: 700;
@@ -131,15 +133,43 @@
       color: var(--accent-color);
       margin-left: 15px;
     }
-    .history-item-info {
-      font-size: 14px;
-      color: var(--light-text-color);
-      text-align: right;
+    .history-item-name {
+        font-size: 16px;
+        font-weight: 500;
+        margin-top: 5px;
+    }
+    .history-item-recorded {
+        font-size: 12px;
+        color: #999;
+    }
+    .cancel-btn {
+        background: var(--error-color); 
+        color: white; 
+        border: none; 
+        padding: 8px 15px; 
+        border-radius: 8px; 
+        font-size: 14px; 
+        font-weight: 600; 
+        cursor: pointer; 
+        transition: background 0.2s;
+        margin-bottom: 5px;
+        display: block;
+    }
+    .cancel-btn:hover { background: #c82333; }
+    .cancel-btn:disabled { background: #bdbdbd; cursor: not-allowed; }
+    .past-info {
+        font-size: 14px;
+        color: var(--light-text-color);
+        padding: 8px 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        display: block;
+        margin-bottom: 5px;
     }
 
 
     /* ====================================================== */
-    /* ★ モバイル向けレスポンシブデザイン調整 ★ (省略) */
+    /* ★ モバイル向けレスポンシブデザイン調整 ★ */
     /* ====================================================== */
     @media (max-width: 650px) {
       body {
@@ -152,34 +182,25 @@
         box-shadow: none;
         max-width: 100%;
       }
-      /* 日付・時間選択グリッドの調整 */
-      #dates {
-        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-        gap: 10px;
-      }
-      #slots {
-        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-        gap: 10px;
-      }
-      .date-btn, .slot {
-        padding: 14px 8px;
-        font-size: 16px;
-      }
       /* 履歴アイテムのモバイル対応 */
       .history-item {
         flex-direction: column;
         align-items: flex-start;
       }
       .history-item-time {
-        margin-left: 0;
-        margin-top: 5px;
+        margin-left: 10px;
       }
-      .history-item-info {
+      .history-info-right {
         width: 100%;
         margin-top: 10px;
         padding-top: 5px;
         border-top: 1px solid var(--border-color);
         text-align: left;
+      }
+      .cancel-btn, .past-info {
+        display: inline-block;
+        margin-right: 10px;
+        margin-bottom: 0;
       }
     }
   </style>
@@ -223,8 +244,8 @@
 // ★★★ 1. LIFF IDを必ず修正してください ★★★
 const LIFF_ID = "2008012264-GAaEPJdZ"; 
 // ★★★ 2. GASのデプロイURLを必ず修正してください ★★★
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwrOH6kS9LTuc9Fhxw0KiMGxfSg1WaYmMALV0V-JFByi1HwQzM9DxdtxatQUzuPr2szJQ/exec";
-// ★ 3. 席数をフロントエンドにも設定 ★
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyI91ZaczBUHDYVfT5a45bcYJdsZ8odzJJ-dmVUoyriWdifoZL8WIhoVvDnu-NHjngh/exec";
+// ★ 3. 席数
 const MAX_CAPACITY = 3;
 
 
@@ -277,7 +298,6 @@ modal.onclick = (e) => {
     if (e.target === modal) modal.classList.remove('active');
 };
 
-// 日付生成 (中略... 変更なし)
 function renderDates() {
   const today = new Date();
   datesEl.innerHTML = ''; 
@@ -297,7 +317,6 @@ function renderDates() {
 function renderDatesSelected() {
   [...datesEl.children].forEach(btn=>{
     const btnDateText = btn.firstElementChild.innerText;
-    const selectedMonthDay = selectedDate ? selectedDate.slice(5).replace('/','') : null;
     btn.classList.toggle('selected', selectedDate && btnDateText.includes(selectedDate.slice(5).replace('-','/')));
   });
 }
@@ -318,7 +337,6 @@ function fetchReservations(dateStr){
     });
 }
 
-// 時間生成 (中略... 変更なし)
 function generateTimes(){ 
     const out=[]; 
     let start=9*60,end=17*60,step=30; 
@@ -330,7 +348,7 @@ function generateTimes(){
     return out; 
 }
 
-// ★★★ 修正点: renderSlots 関数を席数対応に変更 ★★★
+// 時間スロットの描画 (席数対応)
 function renderSlots(reservations, dateStr){
   slotsEl.innerHTML='';
   if(!dateStr){ slotsEl.innerHTML='<p style="text-align:center;color:var(--light-text-color)">日付を選択してください。</p>'; return; }
@@ -381,10 +399,9 @@ function renderSlots(reservations, dateStr){
     slotsEl.innerHTML='<p style="text-align:center;color:var(--light-text-color)">この日は予約可能な時間がありません。</p>';
   }
 }
-// ★★★ 修正点ここまで ★★★
 
 
-// ----------------- 予約履歴機能 ----------------- (中略... 変更なし)
+// ----------------- 予約履歴機能 ----------------- 
 function fetchMyHistory(userId){
   historyContainerEl.style.display = 'block';
   historyEl.innerHTML = '<p style="text-align:center;color:var(--light-text-color)">予約履歴を取得中...</p>';
@@ -403,6 +420,7 @@ function fetchMyHistory(userId){
     });
 }
 
+// 履歴の描画 (キャンセルボタン追加)
 function renderHistory(historyData){
   if(historyData.length === 0){
     historyEl.innerHTML = '<p style="text-align:center;color:var(--light-text-color)">まだ予約履歴はありません。</p>';
@@ -419,19 +437,85 @@ function renderHistory(historyData){
     const div = document.createElement('div');
     div.className = 'history-item';
     
+    // 今後の予約のみキャンセル可能にする (過去の予約はキャンセルできない)
+    const reservationDateTime = new Date(`${item.date}T${item.time}:00`);
+    const isFuture = reservationDateTime > new Date(); 
+
     div.innerHTML = `
-      <div>
+      <div class="history-info-left">
         <span class="history-item-date">${dateDisplay}</span>
         <span class="history-item-time">${item.time}</span>
       </div>
-      <div class="history-item-info">
-        予約者: ${item.name}
-        <br>
-        <span style="font-size: 0.8em;">（登録日時: ${item.recordedAt}）</span>
+      <div class="history-info-right">
+        ${isFuture && item.reservationId ? `<button class="cancel-btn" data-id="${item.reservationId}">キャンセル</button>` : `<span class="past-info">予約済${!isFuture ? ' (過去)' : ''}${!item.reservationId ? ' (ID無)' : ''}</span>`}
+        <div class="history-item-name">予約者: ${item.name}</div>
+        <div class="history-item-recorded">（登録日時: ${item.recordedAt}）</div>
       </div>
     `;
     historyEl.appendChild(div);
   });
+  
+  // キャンセルボタンのイベントリスナー設定
+  document.querySelectorAll('.cancel-btn').forEach(button => {
+    button.addEventListener('click', (event) => {
+      const reservationId = event.target.dataset.id;
+      if (confirm("本当にこの予約をキャンセルしますか？")) {
+        cancelReservation(reservationId);
+      }
+    });
+  });
+}
+
+// キャンセル処理関数
+function cancelReservation(id) {
+    if (!liffUserId) {
+        alert("LINEユーザー情報が取得できません。キャンセルできませんでした。");
+        return;
+    }
+    
+    const btn = document.querySelector(`.cancel-btn[data-id="${id}"]`);
+    if(btn) {
+        btn.disabled = true;
+        btn.innerText = "処理中...";
+    }
+    
+    // POSTリクエストのペイロード
+    const payload = JSON.stringify({
+        action: 'cancel',
+        id: id,
+        userId: liffUserId
+    });
+    
+    fetch(GAS_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=UTF-8'
+        },
+        body: payload
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert("予約をキャンセルしました。");
+            // 予約状況と履歴を再ロード
+            fetchReservations(selectedDate || new Date().toISOString().slice(0,10));
+            fetchMyHistory(liffUserId);
+        } else {
+            alert(`キャンセルに失敗しました: ${data.message}`);
+            if(btn) {
+                btn.disabled = false;
+                btn.innerText = "キャンセル";
+            }
+        }
+    })
+    .catch(err => {
+        console.error("キャンセル通信エラー:", err);
+        alert("通信エラーが発生し、キャンセルできませんでした。");
+        if(btn) {
+            btn.disabled = false;
+            btn.innerText = "キャンセル";
+        }
+    });
 }
 
 
@@ -454,16 +538,19 @@ reserveBtn.onclick=()=>{
   messageEl.className='';
   reserveBtn.disabled=true;
 
-  const form=new URLSearchParams();
-  form.append('name',reservationName);
-  form.append('date',reservationDate);
-  form.append('time',reservationTime);
-  form.append('userId', liffUserId || '');
+  // JSON形式でPOST
+  const payload = JSON.stringify({
+    action: 'reserve',
+    name: reservationName,
+    date: reservationDate,
+    time: reservationTime,
+    userId: liffUserId || ''
+  });
 
   fetch(GAS_URL,{
     method:'POST',
-    headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
-    body: form.toString()
+    headers:{'Content-Type':'application/json;charset=UTF-8'},
+    body: payload
   })
   .then(res=>{if(!res.ok)throw new Error('Network response not ok'); return res.json();})
   .then(data=>{
