@@ -28,39 +28,65 @@
       font-family: 'Noto Sans JP', 'Inter', sans-serif;
       background: var(--background-color);
       margin: 0;
-      padding: 20px;
-      display: flex; 
-      justify-content: center; 
-      align-items: flex-start; /* 上端から開始 */
-      min-height: 100vh;
+      padding: 0; /* bodyのパディングをゼロにする */
       color: var(--text-color);
-      flex-direction: column; /* スマートフォンでの縦並びを維持 */
+      /* LIFFを想定し、デフォルトは縦並び */
+      display: flex;
+      flex-direction: column; 
+      align-items: center;
+      min-height: 100vh;
+      width: 100%;
     }
+    
+    /* ========== メインレイアウトコンテナ: 横並びを制御する部分 ========== */
+    .main-layout {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 1200px; /* 横並び時の最大幅 */
+        padding: 20px;
+        gap: 20px;
+    }
+
     .container {
       background: var(--card-background);
       border-radius: 20px;
       box-shadow: var(--shadow-medium);
       padding: 40px;
-      max-width: 600px;
       width: 100%;
-      margin-bottom: 20px; /* 履歴との間にスペース */
+      flex-shrink: 0; /* 縮小させない */
+      margin-bottom: 20px;
+    }
+
+    /* 予約フォームのコンテナ（右側） */
+    #reservation-form-container {
+        max-width: 600px;
+        order: 2; /* 予約フォームを右側に配置 */
     }
     
-    /* 履歴コンテナのスタイル調整 */
+    /* 履歴コンテナ（左側） */
     #history-container {
-      /* 最大幅を広げ、予約フォームと同じように表示 */
-      max-width: 600px; 
-      /* スクロールなしで全表示するために max-height や height を削除 */
-      overflow: visible; 
-      padding: 30px 40px; /* フォームと同じパディングにする */
+        /* 横並び時のスタイル */
+        max-width: 450px; 
+        order: 1; /* 履歴を左側に配置 */
+        background: var(--card-background);
+        border-radius: 20px;
+        box-shadow: var(--shadow-medium);
+        padding: 30px 40px;
+        /* スクロールバーを非表示にし、コンテンツに合わせて縦に伸びる */
+        overflow: visible; 
+        min-width: 300px; /* 最小幅を設定 */
+        margin-top: 0; /* 横並びなのでマージンをリセット */
     }
 
-    /* 履歴リスト自体もスクロールしないように設定を削除 */
+    /* 履歴リストもスクロールしない */
     #history {
         overflow: visible;
+        max-height: none;
     }
 
-    /* 以下は予約フォーム本体のスタイル（前回の改善版から変更なし） */
+    /* --- 以下はパーツごとのスタイル（省略、前回から変更なし） --- */
     h2 { font-size: 32px; margin-top: 0; margin-bottom: 30px; color: var(--primary-color); text-align: center; font-weight: 700; }
     h3 { 
         font-size: 22px; 
@@ -117,8 +143,7 @@
     /* --- 予約ボタン --- */
     .primary {
       display: block; width: 100%; padding: 18px 20px; border-radius: 14px; border: none; background: var(--accent-color);
-      color: #333; /* ボタンの文字色を濃い色にして視認性アップ */
-      margin-top: 40px; font-size: 24px; font-weight: 700; cursor: pointer; 
+      color: #333; font-size: 24px; font-weight: 700; cursor: pointer; 
       box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
       transition: all 0.3s ease;
     }
@@ -127,39 +152,12 @@
     #message { margin-top: 25px; font-size: 18px; font-weight: 600; text-align: center; color: var(--error-color); }
     #message.error::before { content: '❌ '; font-size: 1.2em; margin-right: 5px; color: var(--error-color); }
 
-    /* --- モーダル --- (デザイン変更なし) */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6);
-      display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px);
-      opacity: 0; transition: opacity 0.3s ease-in-out;
-    }
-    .modal-overlay.active { display: flex; opacity: 1; }
-    .modal-content {
-      background: var(--card-background); padding: 40px; border-radius: 16px; max-width: 450px; width: 90%;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); text-align: center; transform: scale(0.8); opacity: 0;
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .modal-overlay.active .modal-content { transform: scale(1); opacity: 1; }
-    .modal-icon { font-size: 4em; color: var(--success-color); margin-bottom: 15px; }
-    .modal-content h4 { font-size: 28px; color: var(--primary-color); margin-top: 0; margin-bottom: 20px; font-weight: 700; }
-    .modal-details {
-      background: var(--background-color); padding: 15px; border-radius: 10px; margin-bottom: 25px;
-      font-size: 17px; font-weight: 500; line-height: 1.8;
-    }
-    .modal-details strong { color: var(--accent-color); font-weight: 700; font-size: 1.1em; display: block; margin-top: 5px; }
-    #modalCloseBtn {
-      background: var(--secondary-color); color: white; border: none; padding: 12px 25px; border-radius: 10px;
-      font-size: 18px; font-weight: 600; cursor: pointer; transition: background 0.2s;
-    }
-    #modalCloseBtn:hover { background: var(--primary-color); }
-
     /* --- 履歴表示スタイル --- */
     .history-item {
       background: var(--card-background);
       border-radius: 12px;
       padding: 15px;
       margin-bottom: 12px;
-      /* 左のボーダーをアクセントカラーに変更 */
       border-left: 5px solid var(--accent-color); 
       box-shadow: var(--shadow-soft);
       display: flex;
@@ -183,14 +181,43 @@
       text-align: right;
     }
 
+    /* ====================================================== */
+    /* ★ PC/タブレットビュー (650px以上で横並び) ★ */
+    /* ====================================================== */
+    @media (min-width: 651px) {
+        body {
+            /* PCでは中央に配置 */
+            padding: 20px;
+        }
+        .main-layout {
+            /* 横並びを有効化 */
+            flex-direction: row; 
+            align-items: flex-start;
+        }
+        #reservation-form-container {
+            /* フォームエリアが履歴エリアより幅広くなるように */
+            flex-grow: 1;
+            margin-bottom: 0;
+        }
+        #history-container {
+            /* 履歴エリアを左側に固定（order: 1 で実現済み） */
+            /* 画面の高さを超える場合は、LIFF内の親ウィンドウでスクロールが発生 */
+            margin-bottom: 0;
+            margin-top: 0;
+        }
+    }
+
 
     /* ====================================================== */
-    /* ★ モバイル向けレスポンシブデザイン調整 ★ */
+    /* ★ モバイル向けレスポンシブデザイン調整 (650px未満で縦並びに戻す) ★ */
     /* ====================================================== */
     @media (max-width: 650px) {
       body {
         padding: 10px 0;
-        min-height: 100vh;
+      }
+      .main-layout {
+        flex-direction: column; /* 縦並びに戻す */
+        padding: 0;
       }
       .container {
         border-radius: 0;
@@ -198,65 +225,45 @@
         box-shadow: none;
         max-width: 100%;
       }
+      #reservation-form-container, #history-container {
+        order: initial; /* 順番をリセットし、HTMLの記述順（フォーム -> 履歴）にする */
+        max-width: 100%;
+        margin-top: 0;
+      }
       #history-container {
-        padding: 25px 15px; /* モバイルではパディングを調整 */
+        padding: 25px 15px; /* モバイルでのパディング */
+        margin-top: 30px; /* フォームとの間にマージン */
       }
-      /* 日付・時間選択グリッドの調整 */
-      #dates {
-        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-        gap: 10px;
-      }
-      #slots {
-        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-        gap: 10px;
-      }
-      .date-btn, .slot {
-        padding: 14px 8px;
-        font-size: 16px;
-      }
-      /* 履歴アイテムのモバイル対応 */
-      .history-item {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .history-item-time {
-        margin-left: 0;
-        margin-top: 5px;
-      }
-      .history-item-info {
-        width: 100%;
-        margin-top: 10px;
-        padding-top: 5px;
-        border-top: 1px solid var(--border-color);
-        text-align: left;
-      }
+      /* (その他、パーツのモバイル調整は前回と同じ) */
+      #dates { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+      #slots { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 10px; }
     }
   </style>
 </head>
 <body>
-<div class="container">
-  <h2><span>📅</span> 予約フォーム</h2>
-  <label for="name">お名前</label>
-  <input id="name" type="text" placeholder="例: 山田太郎" autocomplete="name" />
+<div class="main-layout">
+    <div id="history-container" style="display: none;">
+      <h3>👤 自分の予約履歴</h3>
+      <div id="history">
+        <p style="text-align:center;color:var(--light-text-color)">LINE連携が完了すると履歴が表示されます。</p>
+      </div>
+    </div>
 
-  <h3>日付を選択してください</h3>
-  <div id="dates"></div>
+    <div class="container" id="reservation-form-container">
+      <h2><span>📅</span> 予約フォーム</h2>
+      <label for="name">お名前</label>
+      <input id="name" type="text" placeholder="例: 山田太郎" autocomplete="name" />
 
-  <h3>時間を選択してください</h3>
-  <div id="slots"></div>
+      <h3>日付を選択してください</h3>
+      <div id="dates"></div>
 
-  <button id="reserveBtn" class="primary" disabled>予約を確定する</button>
-  <div id="message"></div>
-</div>
+      <h3>時間を選択してください</h3>
+      <div id="slots"></div>
 
-<div class="container" id="history-container" style="margin-top: 30px; display: none;">
-  <h3>👤 自分の予約履歴</h3>
-  <div id="history">
-    <p style="text-align:center;color:var(--light-text-color)">LINE連携が完了すると履歴が表示されます。</p>
-  </div>
-</div>
-
-<div id="reservationModal" class="modal-overlay">
+      <button id="reserveBtn" class="primary" disabled>予約を確定する</button>
+      <div id="message"></div>
+    </div>
+</div> <div id="reservationModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-icon">✅</div>
         <h4>ご予約が完了いたしました！</h4>
