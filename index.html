@@ -3,31 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>[店舗名] 予約フォーム</title> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <title>[店舗名] 予約フォーム</title> 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
+    /* ====================================================== */
+    /* ルート変数 (カラーパレット) */
+    /* ====================================================== */
     :root {
-      --primary-color: #007B8C;
-      --secondary-color: #00B1AD;
-      --accent-color: #FF7043;
-      --background-color: #f0f2f5;
-      --card-background: #ffffff;
-      --text-color: #333333;
-      --light-text-color: #666666;
-      --border-color: #e0e0e0;
-      --shadow-medium: 0 8px 25px rgba(0,0,0,0.12);
+      --primary-color: #007B8C;      /* メインカラー: LINEグリーンに似た落ち着いた青緑 */
+      --secondary-color: #00B1AD;     /* アクセントカラー1: 鮮やかなターコイズ */
+      --accent-color: #FF7043;       /* アクセントカラー2: 予約ボタン（オレンジ）*/
+      --background-color: #f0f2f5;   /* 背景色 */
+      --card-background: #ffffff;     /* カード背景色 */
+      --text-color: #333333;         /* 通常テキスト */
+      --light-text-color: #666666;   /* 薄いテキスト */
+      --border-color: #e0e0e0;       /* ボーダー色 */
+      --shadow-light: 0 4px 10px rgba(0,0,0,0.05); /* 軽い影 */
+      --shadow-medium: 0 10px 30px rgba(0,0,0,0.1); /* 強めの影 */
       --success-color: #28a745;
       --error-color: #dc3545;
     }
 
+    /* ====================================================== */
+    /* 基本スタイル */
+    /* ====================================================== */
     * { box-sizing: border-box; }
     body {
       font-family: 'Noto Sans JP', 'Inter', sans-serif;
       background: var(--background-color);
       margin: 0;
       padding: 20px;
-      display: flex; justify-content: center; align-items: center; min-height: 100vh;
+      display: flex; 
+      justify-content: center; 
+      align-items: flex-start; /* 縦方向は中央より上から表示 */
+      min-height: 100vh;
       color: var(--text-color);
       flex-direction: column;
+      width: 100%;
     }
     .container {
       background: var(--card-background);
@@ -36,114 +48,256 @@
       padding: 40px;
       max-width: 600px;
       width: 100%;
+      margin-bottom: 20px; /* コンテナ間の隙間 */
     }
     h2 { font-size: 32px; margin-top: 0; margin-bottom: 30px; color: var(--primary-color); text-align: center; }
-    h3 { font-size: 24px; margin-top: 35px; margin-bottom: 18px; color: var(--primary-color); font-weight: 600; display: flex; align-items: center; }
-    h3::before { content: '👉'; font-size: 0.8em; margin-right: 10px; color: var(--secondary-color); }
-    label { display: block; margin-top: 20px; font-weight: 600; font-size: 18px; color: var(--light-text-color); margin-bottom: 5px; }
+    h3 { 
+        font-size: 22px; 
+        margin-top: 35px; 
+        margin-bottom: 15px; 
+        color: var(--text-color); 
+        font-weight: 700; 
+        border-left: 5px solid var(--secondary-color);
+        padding-left: 15px;
+        line-height: 1.2;
+    }
+    label { 
+        display: block; 
+        margin-top: 20px; 
+        font-weight: 600; 
+        font-size: 16px; 
+        color: var(--light-text-color); 
+        margin-bottom: 8px; 
+    }
     input[type="text"] {
-      width: 100%; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color); margin-top: 5px; font-size: 18px;
-      box-shadow: inset 0 1px 4px rgba(0,0,0,0.08); transition: border-color 0.3s;
+      width: 100%; 
+      padding: 16px 20px; 
+      border-radius: 12px; 
+      border: 1px solid var(--border-color); 
+      margin-top: 5px; 
+      font-size: 18px;
+      box-shadow: var(--shadow-light); 
+      transition: border-color 0.3s, box-shadow 0.3s;
     }
-    input[type="text"]:focus { border-color: var(--secondary-color); box-shadow: 0 0 0 4px rgba(0, 177, 173, 0.25); outline: none; }
+    input[type="text"]:focus { 
+        border-color: var(--secondary-color); 
+        box-shadow: 0 0 0 3px rgba(0, 177, 173, 0.25); 
+        outline: none; 
+    }
 
-    /* --- 日付・時間選択グリッド --- */
-    #dates, #slots { display: grid; gap: 15px; margin-top: 15px; }
+    /* ====================================================== */
+    /* 日付・時間選択グリッド */
+    /* ====================================================== */
+    #dates, #slots { display: grid; gap: 10px; margin-top: 15px; }
     #dates { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
     #slots { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
 
     .date-btn, .slot {
-      display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 18px 10px; border-radius: 14px;
-      border: 1px solid var(--border-color); cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center;
-      font-size: 17px; font-weight: 500; transition: all 0.3s ease-in-out; background-color: var(--card-background);
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 15px 8px; 
+      border-radius: 12px;
+      border: 2px solid var(--border-color); 
+      cursor: pointer; 
+      box-shadow: var(--shadow-light); 
+      text-align: center;
+      font-size: 16px; 
+      font-weight: 600; 
+      transition: all 0.2s ease-in-out; 
+      background-color: var(--card-background);
       position: relative;
     }
-    .date-btn .day-of-week { font-size: 0.9em; color: var(--light-text-color); margin-top: 5px; font-weight: 400; }
-    .date-btn:hover:not(.selected), .slot:hover:not(.selected):not(.booked) { transform: translateY(-3px); border-color: var(--secondary-color); }
-    .date-btn.selected, .slot.selected { background: var(--primary-color); color: #fff; border-color: var(--primary-color); transform: translateY(-2px); }
-    .date-btn.selected .day-of-week { color: rgba(255, 255, 255, 0.8); }
-    /* 満席（booked）スタイル */
-    .slot.booked { background: #e9ecef; color: #999999; cursor: not-allowed; border-color: #d0d0d0; opacity: 0.8; }
-    .slot.booked::after { content: '満席'; position: absolute; bottom: 5px; right: 5px; font-size: 0.7em; font-weight: 600; color: #777; }
-    
+    .date-btn .day-of-week { font-size: 0.9em; color: var(--light-text-color); margin-top: 4px; font-weight: 500; }
+    
+    /* ホバー・選択時のアニメーション */
+    .date-btn:hover:not(.selected), .slot:hover:not(.selected):not(.booked) { 
+        transform: translateY(-2px) scale(1.02); 
+        border-color: var(--secondary-color); 
+    }
+    .date-btn.selected, .slot.selected { 
+        background: var(--primary-color); 
+        color: #fff; 
+        border-color: var(--primary-color); 
+        transform: scale(1.02); 
+        box-shadow: 0 6px 15px rgba(0, 123, 140, 0.4);
+    }
+    .date-btn.selected .day-of-week { color: rgba(255, 255, 255, 0.9); }
+    
+    /* 満席（booked）スタイル */
+    .slot.booked { 
+        background: #e9ecef; 
+        color: #999999; 
+        cursor: not-allowed; 
+        border-color: #d0d0d0; 
+        opacity: 0.7; 
+        box-shadow: none;
+        transform: none;
+    }
+    .slot.booked::after { 
+        content: '満席'; 
+        position: absolute; 
+        top: 0; right: 0;
+        background: var(--error-color);
+        color: white;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-bottom-left-radius: 8px;
+        border-top-right-radius: 8px;
+        font-weight: 700;
+    }
+    .slot.booked span { color: #999999 !important; }
+
     /* 予約数表示のスタイル */
-    .slot span { display: block; font-size: 0.9em; font-weight: 400; margin-top: 2px; color: var(--light-text-color); }
-    .slot.selected span { color: rgba(255, 255, 255, 0.8); }
+    .slot span { 
+        display: block; 
+        font-size: 0.85em; 
+        font-weight: 500; 
+        margin-top: 2px; 
+        color: var(--light-text-color); 
+    }
+    .slot.selected span { color: rgba(255, 255, 255, 0.9); }
 
 
-    /* --- 予約ボタン --- */
+    /* ====================================================== */
+    /* 予約ボタン */
+    /* ====================================================== */
     .primary {
-      display: block; width: 100%; padding: 18px 20px; border-radius: 14px; border: none; background: var(--accent-color);
-      color: #fff; margin-top: 40px; font-size: 24px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 25px rgba(255, 112, 67, 0.4);
+      display: block; 
+      width: 100%; 
+      padding: 18px 20px; 
+      border-radius: 14px; 
+      border: none; 
+      background: var(--accent-color);
+      color: #fff; 
+      margin-top: 40px; 
+      font-size: 24px; 
+      font-weight: 700; 
+      cursor: pointer; 
+      box-shadow: 0 10px 25px rgba(255, 112, 67, 0.5);
       transition: all 0.3s ease;
     }
-    .primary:hover:not(:disabled) { background: #E65100; transform: translateY(-3px); }
-    .primary:disabled { background: #bdbdbd; cursor: not-allowed; opacity: 0.7; }
-    #message { margin-top: 25px; font-size: 18px; font-weight: 600; text-align: center; color: var(--error-color); }
-    #message.error::before { content: '❌ '; font-size: 1.2em; margin-right: 5px; color: var(--error-color); }
+    .primary:hover:not(:disabled) { 
+        background: #E65100; 
+        transform: translateY(-4px); 
+        box-shadow: 0 15px 30px rgba(255, 112, 67, 0.6);
+    }
+    .primary:disabled { 
+        background: #bdbdbd; 
+        cursor: not-allowed; 
+        opacity: 0.8; 
+        box-shadow: none;
+        transform: none;
+    }
+    #message { 
+        margin-top: 25px; 
+        font-size: 18px; 
+        font-weight: 600; 
+        text-align: center; 
+        color: var(--error-color); 
+        padding: 10px 15px;
+        border-radius: 8px;
+        background: #fff0f0;
+    }
+    #message.error::before { 
+        content: '🚨 '; 
+        font-size: 1.2em; 
+        margin-right: 5px; 
+        color: var(--error-color); 
+    }
 
-    /* --- モーダル --- */
+
+    /* ====================================================== */
+    /* モーダル */
+    /* ====================================================== */
     .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6);
-      display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px);
-      opacity: 0; transition: opacity 0.3s ease-in-out;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+      background: rgba(0, 0, 0, 0.7);
+      display: none; justify-content: center; align-items: center; z-index: 1000; 
+      backdrop-filter: blur(8px);
+      opacity: 0; transition: opacity 0.4s ease-in-out;
     }
     .modal-overlay.active { display: flex; opacity: 1; }
     .modal-content {
-      background: var(--card-background); padding: 40px; border-radius: 16px; max-width: 450px; width: 90%;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); text-align: center; transform: scale(0.8); opacity: 0;
-      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      background: var(--card-background); 
+      padding: 40px; 
+      border-radius: 18px; 
+      max-width: 450px; 
+      width: 90%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4); 
+      text-align: center; 
+      transform: translateY(-50px) scale(0.8); 
+      opacity: 0;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .modal-overlay.active .modal-content { transform: scale(1); opacity: 1; }
+    .modal-overlay.active .modal-content { transform: translateY(0) scale(1); opacity: 1; }
     .modal-icon { font-size: 4em; color: var(--success-color); margin-bottom: 15px; }
     .modal-content h4 { font-size: 28px; color: var(--primary-color); margin-top: 0; margin-bottom: 20px; font-weight: 700; }
     .modal-details {
-      background: var(--background-color); padding: 15px; border-radius: 10px; margin-bottom: 25px;
-      font-size: 17px; font-weight: 500; line-height: 1.8;
+      background: var(--background-color); 
+      padding: 20px; 
+      border-radius: 12px; 
+      margin-bottom: 25px;
+      font-size: 17px; 
+      font-weight: 500; 
+      line-height: 1.8;
+      border: 1px solid var(--border-color);
     }
     .modal-details strong { color: var(--accent-color); font-weight: 700; font-size: 1.1em; display: block; margin-top: 5px; }
     #modalCloseBtn {
       background: var(--secondary-color); color: white; border: none; padding: 12px 25px; border-radius: 10px;
       font-size: 18px; font-weight: 600; cursor: pointer; transition: background 0.2s;
+      box-shadow: 0 4px 10px rgba(0, 177, 173, 0.4);
     }
     #modalCloseBtn:hover { background: var(--primary-color); }
 
-    /* --- 履歴表示スタイル --- */
+    /* ====================================================== */
+    /* 履歴表示スタイル */
+    /* ====================================================== */
+    #history-container { margin-top: 30px; }
     .history-item {
       background: var(--card-background);
       border-radius: 12px;
-      padding: 15px;
+      padding: 15px 20px;
       margin-bottom: 12px;
-      border-left: 5px solid var(--primary-color);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      border: 1px solid var(--border-color);
+      border-left: 6px solid var(--primary-color);
+      box-shadow: var(--shadow-light);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
+    .history-item-main {
+      display: flex;
+      align-items: center;
+    }
     .history-item-date {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
       color: var(--primary-color);
     }
     .history-item-time {
-      font-size: 18px;
-      font-weight: 500;
+      font-size: 16px;
+      font-weight: 600;
       color: var(--accent-color);
-      margin-left: 15px;
+      margin-left: 10px;
+      padding: 3px 8px;
+      background: #fff8f5;
+      border-radius: 6px;
     }
     .history-item-info {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--light-text-color);
       text-align: right;
     }
 
-
     /* ====================================================== */
-    /* ★ モバイル向けレスポンシブデザイン調整 ★ */
+    /* モバイル向けレスポンシブデザイン調整 */
     /* ====================================================== */
     @media (max-width: 650px) {
       body {
-        padding: 10px 0;
+        padding: 0;
         min-height: 100vh;
       }
       .container {
@@ -152,33 +306,26 @@
         box-shadow: none;
         max-width: 100%;
       }
-      /* 日付・時間選択グリッドの調整 */
-      #dates {
-        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-        gap: 10px;
-      }
-      #slots {
-        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-        gap: 10px;
-      }
-      .date-btn, .slot {
-        padding: 14px 8px;
-        font-size: 16px;
-      }
+      #dates { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; }
+      #slots { grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 8px; }
+      .date-btn, .slot { padding: 12px 6px; font-size: 14px; }
+      .primary { font-size: 20px; padding: 16px 15px; }
+
       /* 履歴アイテムのモバイル対応 */
       .history-item {
         flex-direction: column;
         align-items: flex-start;
       }
+      .history-item-main {
+        margin-bottom: 8px;
+      }
       .history-item-time {
-        margin-left: 0;
-        margin-top: 5px;
+        margin-left: 10px;
       }
       .history-item-info {
         width: 100%;
-        margin-top: 10px;
         padding-top: 5px;
-        border-top: 1px solid var(--border-color);
+        border-top: 1px dashed var(--border-color);
         text-align: left;
       }
     }
@@ -187,20 +334,20 @@
 <body>
 <div class="container">
   <h2><span>📅</span> 予約フォーム</h2>
-  <label for="name">お名前</label>
+  <label for="name">① お名前</label>
   <input id="name" type="text" placeholder="例: 山田太郎" autocomplete="name" />
 
-  <h3>日付を選択してください</h3>
+  <h3>② 日付を選択してください</h3>
   <div id="dates"></div>
 
-  <h3>時間を選択してください</h3>
+  <h3>③ 時間を選択してください</h3>
   <div id="slots"></div>
 
   <button id="reserveBtn" class="primary" disabled>予約を確定する</button>
   <div id="message"></div>
 </div>
 
-<div class="container" id="history-container" style="margin-top: 30px; padding: 30px; display: none;">
+<div class="container" id="history-container" style="display: none;">
   <h3>👤 自分の予約履歴</h3>
   <div id="history">
     <p style="text-align:center;color:var(--light-text-color)">LINE連携が完了すると履歴が表示されます。</p>
@@ -318,6 +465,7 @@ function fetchReservations(dateStr){
 
 function generateTimes(){ 
     const out=[]; 
+    // 営業時間の設定（例: 9:00から17:00まで、30分刻み）
     let start=9*60,end=17*60,step=30; 
     for(let cur=start;cur<=end;cur+=step){ 
         const hh=String(Math.floor(cur/60)).padStart(2,'0'); 
@@ -340,6 +488,7 @@ function renderSlots(reservations, dateStr){
   
   const now=new Date();
   const todayStr = now.toISOString().slice(0,10);
+  // 予約可能時間のしきい値（例: 予約時間の1時間後まで予約不可）
   const oneHourLater = new Date(now.getTime()+60*60*1000);
   const thresholdMinutes = oneHourLater.getHours()*60 + oneHourLater.getMinutes();
   let hasAvailable=false;
@@ -366,7 +515,13 @@ function renderSlots(reservations, dateStr){
     if(isPast || count >= MAX_CAPACITY){
         btn.classList.add('booked');
     } else {
-      btn.onclick=()=>{ selectedSlot=slot; renderSlots(reservations,dateStr); updateButton(); messageEl.innerText=''; messageEl.className=''; };
+      btn.onclick=()=>{ 
+        selectedSlot=slot; 
+        renderSlots(reservations,dateStr); 
+        updateButton(); 
+        messageEl.innerText=''; 
+        messageEl.className=''; 
+      };
       hasAvailable=true;
     }
     
@@ -417,14 +572,14 @@ function renderHistory(historyData){
     div.className = 'history-item';
     
     div.innerHTML = `
-      <div>
+      <div class="history-item-main">
         <span class="history-item-date">${dateDisplay}</span>
         <span class="history-item-time">${item.time}</span>
       </div>
       <div class="history-item-info">
         予約者: ${item.name}
         <br>
-        <span style="font-size: 0.8em;">（登録日時: ${item.recordedAt}）</span>
+        <span>登録日時: ${item.recordedAt}</span>
       </div>
     `;
     historyEl.appendChild(div);
@@ -434,7 +589,9 @@ function renderHistory(historyData){
 
 // ----------------- 予約送信 -----------------
 // ボタン制御
-function updateButton(){ reserveBtn.disabled = !(nameEl.value.trim() && selectedDate && selectedSlot); }
+function updateButton(){ 
+  reserveBtn.disabled = !(nameEl.value.trim() && selectedDate && selectedSlot); 
+}
 nameEl.addEventListener('input', updateButton);
 
 // 予約送信
@@ -456,12 +613,12 @@ reserveBtn.onclick=()=>{
   messageEl.className='';
   reserveBtn.disabled=true;
 
-  // ★ GASに送るフォームデータにliffUserIdを追加 ★
+  // GASに送るフォームデータにliffUserIdを追加 
   const form=new URLSearchParams();
   form.append('name',reservationName);
   form.append('date',reservationDate);
   form.append('time',reservationTime);
-  form.append('userId', liffUserId); // これがLINE通知の宛先になる
+  form.append('userId', liffUserId); 
 
   fetch(GAS_URL,{
     method:'POST',
@@ -476,10 +633,11 @@ reserveBtn.onclick=()=>{
         <p>ご予約ありがとうございます、<strong>${reservationName}</strong>様。</p>
         <p>予約内容をご確認ください。</p>
         <strong>🗓 日時: ${formattedDate}<br>🕒 時間: ${reservationTime}</strong>
-        <p style="color:var(--success-color); font-weight: 600;">※この後、LINEで予約通知が届きます。</p>
+        <p style="color:var(--success-color); font-weight: 600; margin-top: 15px;">**この後、LINEで予約通知が届きます。**</p>
       `;
       modal.classList.add('active');
       nameEl.value=''; selectedSlot=null;
+      
       // 予約が成功したら予約状況と履歴を更新
       fetchReservations(selectedDate);
       updateButton();
