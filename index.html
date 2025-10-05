@@ -4,42 +4,47 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>[店舗名] 予約フォーム</title> 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     /* ====================================================== */
     /* ルート変数 (カラーパレット) */
     /* ====================================================== */
     :root {
-      --primary-color: #007B8C;      /* メインカラー: LINEグリーンに似た落ち着いた青緑 */
-      --secondary-color: #00B1AD;     /* アクセントカラー1: 鮮やかなターコイズ */
-      --accent-color: #FF7043;       /* アクセントカラー2: 予約ボタン（オレンジ）*/
-      --background-color: #f0f2f5;   /* 背景色 */
-      --card-background: #ffffff;     /* カード背景色 */
-      --text-color: #333333;         /* 通常テキスト */
-      --light-text-color: #666666;   /* 薄いテキスト */
-      --border-color: #e0e0e0;       /* ボーダー色 */
-      --shadow-light: 0 4px 10px rgba(0,0,0,0.05); /* 軽い影 */
-      --shadow-medium: 0 10px 30px rgba(0,0,0,0.1); /* 強めの影 */
+      --primary-color: #007B8C;      
+      --secondary-color: #00B1AD;     
+      --accent-color: #FF7043;       
+      --background-color: #f0f2f5;   
+      --card-background: #ffffff;     
+      --text-color: #333333;         
+      --light-text-color: #666666;   
+      --border-color: #e0e0e0;       
+      --shadow-light: 0 4px 10px rgba(0,0,0,0.05); 
+      --shadow-medium: 0 10px 30px rgba(0,0,0,0.1); 
       --success-color: #28a745;
       --error-color: #dc3545;
     }
 
     /* ====================================================== */
-    /* 基本スタイル */
+    /* 基本スタイル (中央寄せを強化) */
     /* ====================================================== */
     * { box-sizing: border-box; }
+    /* ★追加: htmlとbodyの基本設定 */
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
     body {
       font-family: 'Noto Sans JP', 'Inter', sans-serif;
       background: var(--background-color);
-      margin: 0;
       padding: 20px;
       display: flex; 
-      justify-content: center; 
-      align-items: flex-start; /* 縦方向は中央より上から表示 */
-      min-height: 100vh;
+      justify-content: center; 
+      align-items: center; /* ★これだけで縦横中央寄せに近くなる */
+      min-height: 100vh;
       color: var(--text-color);
       flex-direction: column;
-      width: 100%;
+      width: 100%;
     }
     .container {
       background: var(--card-background);
@@ -48,7 +53,7 @@
       padding: 40px;
       max-width: 600px;
       width: 100%;
-      margin-bottom: 20px; /* コンテナ間の隙間 */
+      margin-bottom: 20px; 
     }
     h2 { font-size: 32px; margin-top: 0; margin-bottom: 30px; color: var(--primary-color); text-align: center; }
     h3 { 
@@ -86,7 +91,7 @@
     }
 
     /* ====================================================== */
-    /* 日付・時間選択グリッド */
+    /* 日付・時間選択グリッド (ご要望の「小さいボックス」と「ホバー」) */
     /* ====================================================== */
     #dates, #slots { display: grid; gap: 10px; margin-top: 15px; }
     #dates { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
@@ -106,18 +111,19 @@
       font-size: 16px; 
       font-weight: 600; 
       transition: all 0.2s ease-in-out; 
-      background-color: var(--card-background);
+      background-color: var(--card-background); /* 背景色 */
       position: relative;
     }
     .date-btn .day-of-week { font-size: 0.9em; color: var(--light-text-color); margin-top: 4px; font-weight: 500; }
     
-    /* ホバー・選択時のアニメーション */
+    /* ホバー・選択時のアニメーション (マウスを合わせたら色が変わる) */
     .date-btn:hover:not(.selected), .slot:hover:not(.selected):not(.booked) { 
         transform: translateY(-2px) scale(1.02); 
         border-color: var(--secondary-color); 
+        background-color: #f7f7f7; /* 薄いグレーに変化 */
     }
     .date-btn.selected, .slot.selected { 
-        background: var(--primary-color); 
+        background: var(--primary-color); /* 選択時はメインカラー */
         color: #fff; 
         border-color: var(--primary-color); 
         transform: scale(1.02); 
