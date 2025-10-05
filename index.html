@@ -6,336 +6,437 @@
   <title>[店舗名] 予約フォーム</title> 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    /* ====================================================== */
-    /* ルート変数 (カラーパレット) */
-    /* ====================================================== */
-    :root {
-      --primary-color: #007B8C;      
-      --secondary-color: #00B1AD;     
-      --accent-color: #FF7043;       
-      --background-color: #f0f2f5;   
-      --card-background: #ffffff;     
-      --text-color: #333333;         
-      --light-text-color: #666666;   
-      --border-color: #e0e0e0;       
-      --shadow-light: 0 4px 10px rgba(0,0,0,0.05); 
-      --shadow-medium: 0 10px 30px rgba(0,0,0,0.1); 
-      --success-color: #28a745;
-      --error-color: #dc3545;
-    }
+    /* ====================================================== */
+    /* ルート変数 (カラーパレット) - モダン＆落ち着いた印象に */
+    /* ====================================================== */
+    :root {
+      --primary-color: #5C6BC0;      /* メインカラー: 落ち着いた青紫 */
+      --secondary-color: #8C9EFF;     /* アクセントカラー1: やや明るい青紫 */
+      --accent-color: #FFB300;       /* アクセントカラー2: 予約ボタン（温かみのあるオレンジイエロー）*/
+      --background-color: #e8ebf0;   /* 背景色: やや明るいグレー */
+      --card-background: #ffffff;     /* カード背景色 */
+      --text-color: #3f4751;         /* 通常テキスト: ダークグレー */
+      --light-text-color: #7f8fa4;   /* 薄いテキスト: ミドルグレー */
+      --border-color: #dbe0e6;       /* ボーダー色: 明るいグレー */
+      --shadow-light: 0 4px 15px rgba(0,0,0,0.08); /* 軽い影 */
+      --shadow-medium: 0 12px 30px rgba(0,0,0,0.15); /* 強めの影 */
+      --success-color: #4CAF50;
+      --error-color: #EF5350;
+    }
 
-    /* ====================================================== */
-    /* 基本スタイル (中央寄せを強化) */
-    /* ====================================================== */
-    * { box-sizing: border-box; }
-    /* ★追加: htmlとbodyの基本設定 */
-    html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-    }
-    body {
-      font-family: 'Noto Sans JP', 'Inter', sans-serif;
-      background: var(--background-color);
-      padding: 20px;
-      display: flex; 
-      justify-content: center; 
-      align-items: center; /* ★これだけで縦横中央寄せに近くなる */
-      min-height: 100vh;
-      color: var(--text-color);
-      flex-direction: column;
-      width: 100%;
-    }
-    .container {
-      background: var(--card-background);
-      border-radius: 20px;
-      box-shadow: var(--shadow-medium);
-      padding: 40px;
-      max-width: 600px;
-      width: 100%;
-      margin-bottom: 20px; 
-    }
-    h2 { font-size: 32px; margin-top: 0; margin-bottom: 30px; color: var(--primary-color); text-align: center; }
-    h3 { 
-        font-size: 22px; 
-        margin-top: 35px; 
-        margin-bottom: 15px; 
+    /* ====================================================== */
+    /* 基本スタイル */
+    /* ====================================================== */
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Noto Sans JP', 'Montserrat', sans-serif;
+      background: var(--background-color);
+      margin: 0;
+      padding: 20px;
+      display: flex; 
+      justify-content: center; 
+      align-items: flex-start; 
+      min-height: 100vh;
+      color: var(--text-color);
+      flex-direction: column;
+      width: 100%;
+      line-height: 1.6;
+    }
+    .container {
+      background: var(--card-background);
+      border-radius: 25px; /* 角をさらに丸く */
+      box-shadow: var(--shadow-medium);
+      padding: 40px;
+      max-width: 650px; /* 少し幅を広げる */
+      width: 100%;
+      margin-bottom: 25px; 
+      animation: fadeIn 0.8s ease-out; /* フェードインアニメーション */
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 { 
+        font-size: 36px; 
+        margin-top: 0; 
+        margin-bottom: 35px; 
+        color: var(--primary-color); 
+        text-align: center; 
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+    h2 span { 
+        margin-right: 10px; 
+        color: var(--secondary-color); /* アイコンの色 */
+    }
+    h3 { 
+        font-size: 24px; 
+        margin-top: 40px; 
+        margin-bottom: 20px; 
         color: var(--text-color); 
         font-weight: 700; 
-        border-left: 5px solid var(--secondary-color);
-        padding-left: 15px;
-        line-height: 1.2;
+        border-bottom: 3px solid var(--secondary-color); /* 下線デザイン */
+        padding-bottom: 8px;
+        line-height: 1.3;
+        position: relative;
     }
-    label { 
+    h3::before { /* 小さな丸い装飾 */
+        content: '';
+        position: absolute;
+        bottom: -3px;
+        left: 0;
+        width: 12px;
+        height: 12px;
+        background: var(--secondary-color);
+        border-radius: 50%;
+        transform: translateY(50%);
+    }
+
+    label { 
         display: block; 
-        margin-top: 20px; 
+        margin-top: 25px; 
         font-weight: 600; 
-        font-size: 16px; 
+        font-size: 17px; 
         color: var(--light-text-color); 
-        margin-bottom: 8px; 
+        margin-bottom: 10px; 
     }
-    input[type="text"] {
-      width: 100%; 
-      padding: 16px 20px; 
-      border-radius: 12px; 
-      border: 1px solid var(--border-color); 
-      margin-top: 5px; 
-      font-size: 18px;
-      box-shadow: var(--shadow-light); 
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-    input[type="text"]:focus { 
-        border-color: var(--secondary-color); 
-        box-shadow: 0 0 0 3px rgba(0, 177, 173, 0.25); 
+    input[type="text"] {
+      width: 100%; 
+      padding: 18px 22px; /* 少し大きめに */
+      border-radius: 15px; /* 角を丸く */
+      border: 1px solid var(--border-color); 
+      font-size: 19px;
+      box-shadow: var(--shadow-light); 
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s ease-out;
+      color: var(--text-color);
+      background-color: var(--card-background);
+    }
+    input[type="text"]:focus { 
+        border-color: var(--primary-color); 
+        box-shadow: 0 0 0 4px rgba(92, 107, 192, 0.2); /* フォーカス時の影 */
         outline: none; 
+        transform: translateY(-2px);
+    }
+    input::placeholder {
+        color: var(--light-text-color);
+        opacity: 0.7;
     }
 
-    /* ====================================================== */
-    /* 日付・時間選択グリッド (ご要望の「小さいボックス」と「ホバー」) */
-    /* ====================================================== */
-    #dates, #slots { display: grid; gap: 10px; margin-top: 15px; }
-    #dates { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
-    #slots { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+    /* ====================================================== */
+    /* 日付・時間選択グリッド */
+    /* ====================================================== */
+    #dates, #slots { 
+        display: grid; 
+        gap: 12px; 
+        margin-top: 20px; 
+        padding: 5px; /* 少しパディング */
+    }
+    #dates { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    #slots { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
 
-    .date-btn, .slot {
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
-      justify-content: center; 
-      padding: 15px 8px; 
-      border-radius: 12px;
-      border: 2px solid var(--border-color); 
-      cursor: pointer; 
-      box-shadow: var(--shadow-light); 
-      text-align: center;
-      font-size: 16px; 
-      font-weight: 600; 
-      transition: all 0.2s ease-in-out; 
-      background-color: var(--card-background); /* 背景色 */
-      position: relative;
-    }
-    .date-btn .day-of-week { font-size: 0.9em; color: var(--light-text-color); margin-top: 4px; font-weight: 500; }
-    
-    /* ホバー・選択時のアニメーション (マウスを合わせたら色が変わる) */
-    .date-btn:hover:not(.selected), .slot:hover:not(.selected):not(.booked) { 
-        transform: translateY(-2px) scale(1.02); 
+    .date-btn, .slot {
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 18px 10px; /* 少し大きめに */
+      border-radius: 15px; /* 角を丸く */
+      border: 2px solid var(--border-color); 
+      cursor: pointer; 
+      box-shadow: var(--shadow-light); 
+      text-align: center;
+      font-size: 17px; 
+      font-weight: 600; 
+      transition: all 0.3s ease-in-out; 
+      background-color: var(--card-background);
+      position: relative;
+      color: var(--text-color);
+    }
+    .date-btn .day-of-week { 
+        font-size: 0.85em; 
+        color: var(--light-text-color); 
+        margin-top: 5px; 
+        font-weight: 500; 
+    }
+    
+    /* ホバー・選択時のアニメーション */
+    .date-btn:hover:not(.selected), .slot:hover:not(.selected):not(.booked) { 
+        transform: translateY(-4px) scale(1.03); /* 大きく跳ねる */
         border-color: var(--secondary-color); 
-        background-color: #f7f7f7; /* 薄いグレーに変化 */
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
     }
-    .date-btn.selected, .slot.selected { 
-        background: var(--primary-color); /* 選択時はメインカラー */
+    .date-btn.selected, .slot.selected { 
+        background: var(--primary-color); 
         color: #fff; 
         border-color: var(--primary-color); 
-        transform: scale(1.02); 
-        box-shadow: 0 6px 15px rgba(0, 123, 140, 0.4);
+        transform: translateY(-2px) scale(1.02); 
+        box-shadow: 0 8px 20px rgba(92, 107, 192, 0.4); /* 影を強調 */
     }
-    .date-btn.selected .day-of-week { color: rgba(255, 255, 255, 0.9); }
-    
+    .date-btn.selected .day-of-week, .slot.selected span { color: rgba(255, 255, 255, 0.9); }
+    
     /* 満席（booked）スタイル */
-    .slot.booked { 
-        background: #e9ecef; 
-        color: #999999; 
+    .slot.booked { 
+        background: #f8f9fa; /* 明るいグレー */
+        color: #b0b0b0; 
         cursor: not-allowed; 
-        border-color: #d0d0d0; 
-        opacity: 0.7; 
+        border-color: #e0e0e0; 
+        opacity: 0.8; 
         box-shadow: none;
         transform: none;
     }
-    .slot.booked::after { 
+    .slot.booked::after { 
         content: '満席'; 
         position: absolute; 
         top: 0; right: 0;
         background: var(--error-color);
         color: white;
-        font-size: 10px;
-        padding: 2px 6px;
-        border-bottom-left-radius: 8px;
-        border-top-right-radius: 8px;
+        font-size: 11px;
+        padding: 3px 8px;
+        border-bottom-left-radius: 10px;
+        border-top-right-radius: 15px;
         font-weight: 700;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
-    .slot.booked span { color: #999999 !important; }
+    .slot.booked span { color: #b0b0b0 !important; }
 
-    /* 予約数表示のスタイル */
-    .slot span { 
+    /* 予約数表示のスタイル */
+    .slot span { 
         display: block; 
-        font-size: 0.85em; 
+        font-size: 0.8em; 
         font-weight: 500; 
-        margin-top: 2px; 
+        margin-top: 4px; 
         color: var(--light-text-color); 
     }
-    .slot.selected span { color: rgba(255, 255, 255, 0.9); }
 
 
-    /* ====================================================== */
-    /* 予約ボタン */
-    /* ====================================================== */
-    .primary {
-      display: block; 
-      width: 100%; 
-      padding: 18px 20px; 
-      border-radius: 14px; 
-      border: none; 
-      background: var(--accent-color);
-      color: #fff; 
-      margin-top: 40px; 
-      font-size: 24px; 
-      font-weight: 700; 
-      cursor: pointer; 
-      box-shadow: 0 10px 25px rgba(255, 112, 67, 0.5);
-      transition: all 0.3s ease;
-    }
-    .primary:hover:not(:disabled) { 
-        background: #E65100; 
-        transform: translateY(-4px); 
-        box-shadow: 0 15px 30px rgba(255, 112, 67, 0.6);
+    /* ====================================================== */
+    /* 予約ボタン */
+    /* ====================================================== */
+    .primary {
+      display: block; 
+      width: 100%; 
+      padding: 20px 25px; 
+      border-radius: 16px; 
+      border: none; 
+      background: var(--accent-color);
+      color: #fff; 
+      margin-top: 50px; 
+      font-size: 26px; 
+      font-weight: 700; 
+      cursor: pointer; 
+      box-shadow: 0 12px 30px rgba(255, 179, 0, 0.5); /* 影を強調 */
+      transition: all 0.3s ease;
+      letter-spacing: 0.8px;
     }
-    .primary:disabled { 
-        background: #bdbdbd; 
+    .primary:hover:not(:disabled) { 
+        background: #FFCA28; /* 少し明るく */
+        transform: translateY(-6px); 
+        box-shadow: 0 18px 40px rgba(255, 179, 0, 0.6);
+    }
+    .primary:disabled { 
+        background: #cfd8dc; /* 薄いグレー */
         cursor: not-allowed; 
-        opacity: 0.8; 
+        opacity: 0.9; 
         box-shadow: none;
         transform: none;
     }
-    #message { 
-        margin-top: 25px; 
-        font-size: 18px; 
+    #message { 
+        margin-top: 30px; 
+        font-size: 19px; 
         font-weight: 600; 
         text-align: center; 
         color: var(--error-color); 
-        padding: 10px 15px;
-        border-radius: 8px;
-        background: #fff0f0;
+        padding: 15px 20px;
+        border-radius: 12px;
+        background: #fffafa; /* 薄い赤背景 */
+        border: 1px solid rgba(239, 83, 80, 0.3);
+        animation: shake 0.5s;
     }
-    #message.error::before { 
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-5px); }
+        40%, 80% { transform: translateX(5px); }
+    }
+    #message.error::before { 
         content: '🚨 '; 
         font-size: 1.2em; 
-        margin-right: 5px; 
+        margin-right: 8px; 
         color: var(--error-color); 
     }
 
 
-    /* ====================================================== */
-    /* モーダル */
-    /* ====================================================== */
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-      background: rgba(0, 0, 0, 0.7);
-      display: none; justify-content: center; align-items: center; z-index: 1000; 
-      backdrop-filter: blur(8px);
-      opacity: 0; transition: opacity 0.4s ease-in-out;
-    }
-    .modal-overlay.active { display: flex; opacity: 1; }
-    .modal-content {
-      background: var(--card-background); 
-      padding: 40px; 
-      border-radius: 18px; 
-      max-width: 450px; 
-      width: 90%;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4); 
-      text-align: center; 
-      transform: translateY(-50px) scale(0.8); 
-      opacity: 0;
-      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .modal-overlay.active .modal-content { transform: translateY(0) scale(1); opacity: 1; }
-    .modal-icon { font-size: 4em; color: var(--success-color); margin-bottom: 15px; }
-    .modal-content h4 { font-size: 28px; color: var(--primary-color); margin-top: 0; margin-bottom: 20px; font-weight: 700; }
-    .modal-details {
-      background: var(--background-color); 
-      padding: 20px; 
-      border-radius: 12px; 
-      margin-bottom: 25px;
-      font-size: 17px; 
-      font-weight: 500; 
-      line-height: 1.8;
-      border: 1px solid var(--border-color);
-    }
-    .modal-details strong { color: var(--accent-color); font-weight: 700; font-size: 1.1em; display: block; margin-top: 5px; }
-    #modalCloseBtn {
-      background: var(--secondary-color); color: white; border: none; padding: 12px 25px; border-radius: 10px;
-      font-size: 18px; font-weight: 600; cursor: pointer; transition: background 0.2s;
-      box-shadow: 0 4px 10px rgba(0, 177, 173, 0.4);
-    }
-    #modalCloseBtn:hover { background: var(--primary-color); }
+    /* ====================================================== */
+    /* モーダル */
+    /* ====================================================== */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+      background: rgba(0, 0, 0, 0.8); /* 影を濃く */
+      display: none; justify-content: center; align-items: center; z-index: 1000; 
+      backdrop-filter: blur(10px); /* ぼかしを強く */
+      opacity: 0; transition: opacity 0.5s ease-in-out;
+    }
+    .modal-overlay.active { display: flex; opacity: 1; }
+    .modal-content {
+      background: var(--card-background); 
+      padding: 50px; 
+      border-radius: 20px; 
+      max-width: 500px; 
+      width: 90%;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5); /* 影を強調 */
+      text-align: center; 
+      transform: translateY(-80px) scale(0.7); 
+      opacity: 0;
+      transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1.1); /* 弾むようなアニメーション */
+    }
+    .modal-overlay.active .modal-content { transform: translateY(0) scale(1); opacity: 1; }
+    .modal-icon { 
+        font-size: 5em; 
+        color: var(--success-color); 
+        margin-bottom: 20px; 
+        animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* アイコンのポップアップ */
+    }
+    @keyframes popIn {
+        0% { transform: scale(0); opacity: 0; }
+        70% { transform: scale(1.2); opacity: 1; }
+        100% { transform: scale(1); }
+    }
+    .modal-content h4 { 
+        font-size: 30px; 
+        color: var(--primary-color); 
+        margin-top: 0; 
+        margin-bottom: 25px; 
+        font-weight: 700; 
+        line-height: 1.3;
+    }
+    .modal-details {
+      background: var(--background-color); 
+      padding: 25px; 
+      border-radius: 15px; 
+      margin-bottom: 30px;
+      font-size: 18px; 
+      font-weight: 500; 
+      line-height: 1.8;
+      border: 1px solid var(--border-color);
+      text-align: left;
+    }
+    .modal-details strong { 
+        color: var(--accent-color); 
+        font-weight: 700; 
+        font-size: 1.2em; 
+        display: block; 
+        margin-top: 8px; 
+    }
+    #modalCloseBtn {
+      background: var(--secondary-color); color: white; border: none; padding: 14px 30px; border-radius: 12px;
+      font-size: 20px; font-weight: 600; cursor: pointer; transition: background 0.3s, transform 0.2s;
+      box-shadow: 0 6px 15px rgba(140, 158, 255, 0.5);
+    }
+    #modalCloseBtn:hover { 
+        background: var(--primary-color); 
+        transform: translateY(-2px); 
+        box-shadow: 0 8px 18px rgba(92, 107, 192, 0.5);
+    }
 
-    /* ====================================================== */
-    /* 履歴表示スタイル */
-    /* ====================================================== */
-    #history-container { margin-top: 30px; }
-    .history-item {
-      background: var(--card-background);
-      border-radius: 12px;
-      padding: 15px 20px;
-      margin-bottom: 12px;
-      border: 1px solid var(--border-color);
-      border-left: 6px solid var(--primary-color);
-      box-shadow: var(--shadow-light);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .history-item-main {
-      display: flex;
-      align-items: center;
-    }
-    .history-item-date {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--primary-color);
-    }
-    .history-item-time {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--accent-color);
-      margin-left: 10px;
-      padding: 3px 8px;
-      background: #fff8f5;
-      border-radius: 6px;
-    }
-    .history-item-info {
-      font-size: 13px;
-      color: var(--light-text-color);
-      text-align: right;
-    }
+    /* ====================================================== */
+    /* 履歴表示スタイル */
+    /* ====================================================== */
+    #history-container { margin-top: 30px; }
+    #history-container h3::before { background: var(--accent-color); } /* 履歴タイトルの下線装飾の色 */
 
-    /* ====================================================== */
-    /* モバイル向けレスポンシブデザイン調整 */
-    /* ====================================================== */
-    @media (max-width: 650px) {
-      body {
-        padding: 0;
-        min-height: 100vh;
-      }
-      .container {
-        border-radius: 0;
-        padding: 25px 15px;
-        box-shadow: none;
-        max-width: 100%;
-      }
-      #dates { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; }
-      #slots { grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 8px; }
-      .date-btn, .slot { padding: 12px 6px; font-size: 14px; }
-      .primary { font-size: 20px; padding: 16px 15px; }
+    .history-item {
+      background: var(--card-background);
+      border-radius: 15px;
+      padding: 20px 25px;
+      margin-bottom: 15px;
+      border: 1px solid var(--border-color);
+      border-left: 8px solid var(--primary-color); /* 左側の色を強調 */
+      box-shadow: var(--shadow-light);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    }
+    .history-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+    .history-item-main {
+      display: flex;
+      align-items: center;
+    }
+    .history-item-date {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+    .history-item-time {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--accent-color);
+      margin-left: 15px;
+      padding: 5px 10px;
+      background: #fff8e1; /* アクセントカラーに合わせた背景 */
+      border-radius: 8px;
+    }
+    .history-item-info {
+      font-size: 14px;
+      color: var(--light-text-color);
+      text-align: right;
+      line-height: 1.5;
+    }
 
-      /* 履歴アイテムのモバイル対応 */
-      .history-item {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .history-item-main {
-        margin-bottom: 8px;
-      }
-      .history-item-time {
-        margin-left: 10px;
-      }
-      .history-item-info {
-        width: 100%;
-        padding-top: 5px;
-        border-top: 1px dashed var(--border-color);
-        text-align: left;
-      }
-    }
-  </style>
+    /* ====================================================== */
+    /* モバイル向けレスポンシブデザイン調整 */
+    /* ====================================================== */
+    @media (max-width: 768px) {
+        body { padding: 10px; }
+        .container {
+            padding: 30px 20px;
+            border-radius: 15px;
+        }
+        h2 { font-size: 28px; margin-bottom: 25px; }
+        h3 { font-size: 20px; margin-top: 30px; }
+        input[type="text"] { padding: 15px 18px; font-size: 17px; }
+
+        #dates { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+        #slots { grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)); gap: 10px; }
+        .date-btn, .slot { padding: 14px 8px; font-size: 15px; border-radius: 12px;}
+        .date-btn .day-of-week { font-size: 0.8em; }
+
+        .primary { font-size: 22px; padding: 18px 20px; margin-top: 40px; border-radius: 14px; }
+        #message { font-size: 16px; padding: 12px 15px; }
+
+        .modal-content { padding: 30px; border-radius: 15px; }
+        .modal-icon { font-size: 4em; }
+        .modal-content h4 { font-size: 24px; margin-bottom: 20px; }
+        .modal-details { padding: 18px; font-size: 16px; border-radius: 10px; }
+        #modalCloseBtn { padding: 10px 20px; font-size: 17px; border-radius: 10px; }
+
+        .history-item {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 15px 18px;
+            border-radius: 12px;
+            border-left: 6px solid var(--primary-color);
+        }
+        .history-item-main {
+            margin-bottom: 8px;
+            width: 100%;
+            justify-content: flex-start;
+        }
+        .history-item-date { font-size: 18px; }
+        .history-item-time { margin-left: 10px; font-size: 15px; padding: 4px 8px;}
+        .history-item-info {
+            width: 100%;
+            padding-top: 10px;
+            margin-top: 10px;
+            border-top: 1px dashed var(--border-color);
+            text-align: left;
+        }
+    }
+  </style>
 </head>
 <body>
 <div class="container">
